@@ -1,4 +1,4 @@
-import { Actions, Selectors, StateBranch } from '../../redux-state-branch';
+import { Actions, Selectors, StateBranch } from 'redux-state-branch';
 
 class TodosSelectors extends Selectors {
   viewByFilter(state) {

@@ -2,6 +2,7 @@
   "name": "redux-state-branch",
   "version": "0.1.0",
   "private": true,
+  "main": "dist/index",
   "dependencies": {
     "react": "^16.4.2",
     "react-dom": "^16.4.2",
@@ -10,9 +11,10 @@
     "redux": "^4.0.0"
   },
   "scripts": {
-    "start": "react-scripts-ts start",
-    "build": "react-scripts-ts build",
-    "test": "react-scripts-ts test --env=jsdom",
+    "start": "react-app-rewired start --scripts-version react-scripts-ts",
+    "build": "./scripts/build.sh",
+    "build:docs": "rm -R -f docs && react-app-rewired build --scripts-version react-scripts-ts && mv build docs",
+    "test": "react-app-rewired test --scripts-version react-scripts-ts --env=jsdom",
     "eject": "react-scripts-ts eject"
   },
   "devDependencies": {
@@ -23,7 +25,9 @@
     "@types/react-redux": "^6.0.6",
     "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
+    "flowgen": "^1.2.2",
     "prettier-tslint": "^0.4.0",
+    "react-app-rewired": "^1.5.2",
     "typescript": "^3.0.1"
   }
 }

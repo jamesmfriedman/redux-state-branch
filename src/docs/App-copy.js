@@ -2,35 +2,31 @@ import * as React from 'react';
 import { connect } from 'react-redux';
 import './App.css';
 
-import logo from './logo.svg';
 import { todosBranch } from './state/todos/index.js';
 
 class App extends React.Component {
   render() {
     const {
       todos,
-      viewByFilter,
+      todosMeta,
       createTodo,
+      updateTodo,
       resetTodos,
-      changePriority,
-      toggleDone,
-      updateText,
-      isLoading,
-      updateViewByFilter
+      updateTodosMeta
     } = this.props;
 
     return (
       <div className="App">
-        <button onClick={createTodo} disabled={isLoading}>
-          {isLoading ? 'Creating...' : 'New Todo'}
-        </button>
+        <button onClick={createTodo}>New Todo</button>
         <button onClick={resetTodos}>Reset All</button>
 
         <label>
           Filter
           <select
-            value={viewByFilter}
-            onChange={evt => updateViewByFilter(evt.target.value)}
+            value={todosMeta.viewByFilter}
+            onChange={evt =>
+              updateTodosMeta({ viewByFilter: evt.target.value })
+            }
           >
             <option value="all">All</option>
             <option value="todo">Todo</option>
@@ -47,16 +43,22 @@ class App extends React.Component {
               <input
                 type="checkbox"
                 checked={todo.isDone}
-                onChange={evt => toggleDone(todo.id, evt.target.checked)}
+                onChange={evt =>
+                  updateTodo({ id: todo.id, isDone: evt.target.checked })
+                }
               />
               <input
                 placeholder="Write something..."
                 value={todo.text}
-                onChange={evt => updateText(todo.id, evt.target.value)}
+                onChange={evt =>
+                  updateTodo({ id: todo.id, text: evt.target.value })
+                }
               />
               <select
                 value={todo.priority}
-                onChange={evt => changePriority(todo.id, evt.target.value)}
+                onChange={evt =>
+                  updateTodo({ id: todo.id, priority: evt.target.value })
+                }
               >
                 <option value="low">Low</option>
                 <option value="normal">Normal</option>
@@ -72,25 +74,30 @@ class App extends React.Component {
 
 export default connect(
   state => {
-    const viewByFilter = todosBranch.select.viewByFilter(state);
-    const todos = todosBranch.select.visibleTodos(state, viewByFilter);
-    const isLoading = todosBranch.select.loading(state);
+    const todosMeta = todosBranch.select.meta(state);
+    const todos = todosBranch.select.where(state, todo => {
+      switch (todosMeta.viewByFilter) {
+        case 'todo':
+          return !todo.isDone;
+        case 'done':
+          return todo.isDone;
+        case 'low':
+        case 'normal':
+        case 'high':
+          return todo.priority === todosMeta.viewByFilter;
+        default:
+          return true;
+      }
+    });
 
     return {
       todos,
-      viewByFilter,
-      isLoading
+      todosMeta
     };
   },
   dispatch => ({
-    updateViewByFilter: viewByFilter =>
-      dispatch(todosBranch.action.updateViewByFilter(viewByFilter)),
-    toggleDone: (todoId, isDone) =>
-      dispatch(todosBranch.action.toggleDone(todoId, isDone)),
-    updateText: (todoId, text) =>
-      dispatch(todosBranch.action.updateText(todoId, text)),
-    changePriority: (todoId, priority) =>
-      dispatch(todosBranch.action.changePriority(todoId, priority)),
+    updateTodosMeta: meta => dispatch(todosBranch.action.setMeta(meta)),
+    updateTodo: todo => dispatch(todosBranch.action.update(todo)),
     createTodo: () => dispatch(todosBranch.action.create()),
     resetTodos: () => dispatch(todosBranch.action.reset())
   })

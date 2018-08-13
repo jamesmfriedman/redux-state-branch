@@ -1,8 +1,11 @@
-type ItemT<T> = T & { id: string };
+import { makeType } from './utils';
 
-type ItemsT<T> = T | T[];
 
-interface IConstants {
+export type ItemT<T> = T & { id: string };
+
+export type ItemsT<T> = T | T[];
+
+export interface IConstants {
   CREATE: string;
   REPLACE: string;
   UPDATE: string;
@@ -11,20 +14,42 @@ interface IConstants {
   SET_META: string;
 }
 
-interface IAction<T> {
+export interface IAction<T> {
   type: string;
   items: ItemsT<T>;
   meta: { [key: string]: any };
 }
 
-interface IState {
+export interface IState {
   [key: string]: any;
 }
 
-// type DispatchT = (action: object) => any;
+export class Selectors<T> {
+  protected name: string;
 
-const makeType = (prefix: string, suffix?: string) =>
-  `${prefix}${suffix ? "/" + suffix : ""}`;
+  constructor(name: string) {
+    this.name = name;
+  }
+
+  public byId(state: IState, id: string): T | void {
+    return state[this.name].items[id];
+  }
+
+  public all(state: IState): T[] {
+    return Object.values(state[this.name].items);
+  }
+
+  public where(state: IState, condition: (item: ItemT<T>) => boolean): T[] {
+    return this.all(state).filter(condition);
+  }
+
+  public meta(state: IState): { [key: string]: any } | void {
+    const { items, ...meta } = state[this.name];
+    return meta;
+  }
+}
+
+
 
 export class Actions<T> {
   protected constants: IConstants;
@@ -80,37 +105,13 @@ export class Actions<T> {
   }
 }
 
-export class Selectors<T> {
-  protected name: string;
-
-  constructor(name: string) {
-    this.name = name;
-  }
-
-  public byId(state: IState, id: string): T | void {
-    return state[this.name].items[id];
-  }
-
-  public all(state: IState): T[] {
-    return Object.values(state[this.name].items);
-  }
-
-  public where(state: IState, condition: (item: ItemT<T>) => boolean): T[] {
-    return this.all(state).filter(condition);
-  }
-
-  public meta(state: IState): { [key: string]: any } | void {
-    const { items, ...meta } = state[this.name];
-    return meta;
-  }
-}
-
 interface IStateBranchOpts<T, A, S> {
   name: string;
   actions?: new (constants: IConstants) => A | Actions<T>;
   selectors?: new (name: string) => S | Selectors<T>;
   defaultItem?: { [key: string]: any };
   defaultState?: { [key: string]: any };
+  reducer?: (state: IState, action: IAction<T>) => IState;
 }
 
 export class StateBranch<T, A, S> {
@@ -121,13 +122,15 @@ export class StateBranch<T, A, S> {
   public select: S | Selectors<T>;
   public defaultItem: { [key: string]: any };
   public defaultState: { [key: string]: any };
+  protected extendedReducer: (state: IState, action: IAction<T>) => IState;
 
   constructor({
     name,
     actions: ActionsConstructor = Actions,
     selectors: SelectorsConstructor = Selectors,
     defaultItem = {},
-    defaultState = { items: {} }
+    defaultState = { items: {} },
+    reducer = (state, action) => state
   }: IStateBranchOpts<T, A, S>) {
     this.name = name;
 
@@ -145,9 +148,10 @@ export class StateBranch<T, A, S> {
     this.reducer = this.reducer.bind(this);
     this.defaultItem = defaultItem;
     this.defaultState = defaultState;
+    this.extendedReducer = reducer;
   }
 
-  public reducer(state: any = this.defaultState, action: IAction<T>) {
+  public reducer(state: IState = this.defaultState, action: IAction<T>) {
     const items = Array.isArray(action.items) ? action.items : [action.items];
     const type = action.type.split("/", 2).join("/");
 
@@ -226,7 +230,7 @@ export class StateBranch<T, A, S> {
       case this.constants.RESET:
         return this.defaultState;
       default:
-        return state;
+        return this.extendedReducer(state, action);
     }
   }
 }
