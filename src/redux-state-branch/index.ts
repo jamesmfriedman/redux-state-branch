@@ -1,6 +1,5 @@
 import { makeType } from './utils';
 
-
 export type ItemT<T> = T & { id: string };
 
 export type ItemsT<T> = T | T[];
@@ -31,25 +30,23 @@ export class Selectors<T> {
     this.name = name;
   }
 
-  public byId(state: IState, id: string): T | void {
+  byId(state: IState, id: string): T | void {
     return state[this.name].items[id];
   }
 
-  public all(state: IState): T[] {
+  all(state: IState): T[] {
     return Object.values(state[this.name].items);
   }
 
-  public where(state: IState, condition: (item: ItemT<T>) => boolean): T[] {
+  where(state: IState, condition: (item: ItemT<T>) => boolean): T[] {
     return this.all(state).filter(condition);
   }
 
-  public meta(state: IState): { [key: string]: any } | void {
+  meta(state: IState): { [key: string]: any } | void {
     const { items, ...meta } = state[this.name];
     return meta;
   }
 }
-
-
 
 export class Actions<T> {
   protected constants: IConstants;
@@ -58,47 +55,47 @@ export class Actions<T> {
     this.constants = constants;
   }
 
-  public replace(items: ItemsT<T>, suffix?: string) {
+  replace(items: ItemsT<T>, suffix?: string) {
     return {
       type: makeType(this.constants.REPLACE, suffix),
       items
     };
   }
 
-  public delete(items: ItemsT<T> | string | string[], suffix?: string) {
+  delete(items: ItemsT<T> | string | string[], suffix?: string) {
     const wrappedItems = !Array.isArray(items) ? [items] : items;
 
     return {
       type: makeType(this.constants.DELETE, suffix),
       items:
-        typeof wrappedItems[0] === "string"
+        typeof wrappedItems[0] === 'string'
           ? (wrappedItems as string[]).map((id: string) => ({ id }))
           : wrappedItems
     };
   }
 
-  public create(items?: ItemsT<T>, suffix?: string) {
+  create(items?: ItemsT<T>, suffix?: string) {
     return {
       type: makeType(this.constants.CREATE, suffix),
       items: items || {}
     };
   }
 
-  public update(items: ItemsT<T>, suffix?: string) {
+  update(items: ItemsT<T>, suffix?: string) {
     return {
       type: makeType(this.constants.UPDATE, suffix),
       items
     };
   }
 
-  public setMeta(meta: { [key: string]: any }, suffix?: string) {
+  setMeta(meta: { [key: string]: any }, suffix?: string) {
     return {
       type: makeType(this.constants.SET_META, suffix),
       meta
     };
   }
 
-  public reset(suffix?: string) {
+  reset(suffix?: string) {
     return {
       type: makeType(this.constants.RESET, suffix)
     };
@@ -115,13 +112,13 @@ interface IStateBranchOpts<T, A, S> {
 }
 
 export class StateBranch<T, A, S> {
-  public name: string;
+  name: string;
 
-  public constants: IConstants;
-  public action: A | Actions<T>;
-  public select: S | Selectors<T>;
-  public defaultItem: { [key: string]: any };
-  public defaultState: { [key: string]: any };
+  constants: IConstants;
+  action: A | Actions<T>;
+  select: S | Selectors<T>;
+  defaultItem: { [key: string]: any };
+  defaultState: { [key: string]: any };
   protected extendedReducer: (state: IState, action: IAction<T>) => IState;
 
   constructor({
@@ -151,9 +148,9 @@ export class StateBranch<T, A, S> {
     this.extendedReducer = reducer;
   }
 
-  public reducer(state: IState = this.defaultState, action: IAction<T>) {
+  reducer(state: IState = this.defaultState, action: IAction<T>) {
     const items = Array.isArray(action.items) ? action.items : [action.items];
-    const type = action.type.split("/", 2).join("/");
+    const type = action.type.split('/', 2).join('/');
 
     switch (type) {
       case this.constants.CREATE:

@@ -11,7 +11,9 @@
     "ordered-imports": false,
     "max-classes-per-file": false,
     "object-literal-sort-keys": false,
-    "no-console": false
+    "no-console": false,
+    "member-access": [true, "no-public"],
+    "jsx-boolean-value": false
   },
   "jsRules": {
     "object-literal-sort-keys": false
