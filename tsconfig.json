@@ -1,5 +1,7 @@
 {
   "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
     "baseUrl": ".",
     "outDir": "out",
     "declaration": true,
@@ -13,7 +15,7 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
-    "noImplicitAny": true,
+    "noImplicitAny": false,
     "strictNullChecks": true,
     "suppressImplicitAnyIndexErrors": true,
     "noUnusedLocals": true,
@@ -21,19 +23,5 @@
       "redux-state-branch/*": ["src/redux-state-branch/*"]
     }
   },
-  "exclude": [
-    "node_modules",
-    "build",
-    "out",
-    "docs",
-    "scripts",
-    "acceptance-tests",
-    "webpack",
-    "jest",
-    "config-overrides.js",
-    "src/setupTests.ts",
-    "src/docs",
-    "src/index.tsx",
-    "flow-typed"
-  ]
+  "include": ["src/**/*", "typings/**/*"]
 }

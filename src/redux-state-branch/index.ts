@@ -4,6 +4,8 @@ export type ItemT<T> = T & { id: string };
 
 export type ItemsT<T> = T | T[];
 
+export type ID = string;
+
 export interface IConstants {
   CREATE: string;
   REPLACE: string;
@@ -30,7 +32,7 @@ export class Selectors<T> {
     this.name = name;
   }
 
-  byId(state: IState, id: string): T | void {
+  byId(state: IState, id: ID): T | void {
     return state[this.name].items[id];
   }
 
@@ -55,18 +57,18 @@ export class Actions<T> {
     this.constants = constants;
   }
 
-  replace(items: ItemsT<T>, suffix?: string) {
+  replace(items: ItemsT<T>, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.REPLACE, suffix),
+      type: makeType(this.constants.REPLACE, devToolsSuffix),
       items
     };
   }
 
-  delete(items: ItemsT<T> | string | string[], suffix?: string) {
+  delete(items: ItemsT<T> | ID | ID[], devToolsSuffix?: string) {
     const wrappedItems = !Array.isArray(items) ? [items] : items;
 
     return {
-      type: makeType(this.constants.DELETE, suffix),
+      type: makeType(this.constants.DELETE, devToolsSuffix),
       items:
         typeof wrappedItems[0] === 'string'
           ? (wrappedItems as string[]).map((id: string) => ({ id }))
@@ -74,30 +76,30 @@ export class Actions<T> {
     };
   }
 
-  create(items?: ItemsT<T>, suffix?: string) {
+  create(items?: ItemsT<T>, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.CREATE, suffix),
+      type: makeType(this.constants.CREATE, devToolsSuffix),
       items: items || {}
     };
   }
 
-  update(items: ItemsT<T>, suffix?: string) {
+  update(items: ItemsT<T>, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.UPDATE, suffix),
+      type: makeType(this.constants.UPDATE, devToolsSuffix),
       items
     };
   }
 
-  setMeta(meta: { [key: string]: any }, suffix?: string) {
+  setMeta(meta: { [key: string]: any }, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.SET_META, suffix),
+      type: makeType(this.constants.SET_META, devToolsSuffix),
       meta
     };
   }
 
-  reset(suffix?: string) {
+  reset(devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.RESET, suffix)
+      type: makeType(this.constants.RESET, devToolsSuffix)
     };
   }
 }

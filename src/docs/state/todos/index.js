@@ -51,16 +51,14 @@ class TodosActions extends Actions {
   }
 
   // Handling an Async action
-  create() {
+  createTodo() {
     // Using redux thunk we get access to dispatch
     return dispatch => {
       dispatch(this.setMeta({ loading: true }, 'loading'));
 
       // Fake an async call, IRL use fetch...
-      setTimeout(() => {
-        dispatch(super.create());
-        dispatch(this.setMeta({ loading: false }, 'loading'));
-      }, 2000);
+      dispatch(this.create());
+      dispatch(this.setMeta({ loading: false }, 'loading'));
     };
   }
 }

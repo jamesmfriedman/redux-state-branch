@@ -3,7 +3,7 @@
   "linterOptions": {
     "exclude": [
       "config/**/*.js",
-      "node_modules/**/*.ts",
+      "node_modules/**/*",
       "coverage/lcov-report/*.js"
     ]
   },
@@ -13,7 +13,8 @@
     "object-literal-sort-keys": false,
     "no-console": false,
     "member-access": [true, "no-public"],
-    "jsx-boolean-value": false
+    "jsx-boolean-value": false,
+    "jsx-no-lambda": false
   },
   "jsRules": {
     "object-literal-sort-keys": false
