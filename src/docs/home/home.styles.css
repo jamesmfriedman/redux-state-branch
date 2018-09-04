@@ -13,14 +13,14 @@
 }
 
 .home__title {
-  font-size: 6.5vw !important;
+  font-size: 4rem !important;
   line-height: 1 !important;
-  margin: 0 0 1.5rem 0 !important;
+  margin: 2.5rem 0 1.5rem 0 !important;
 }
 
 .home__subtitle {
   font-size: 3.3vw;
-  margin: 0 0 5rem 0 !important;
+  margin: 0 0 2rem 0 !important;
   padding: 0;
   color: var(--mdc-theme-text-secondary-on-background);
   font-weight: normal;
@@ -32,12 +32,13 @@
   border-radius: 3px;
   padding: 0.5rem 1rem;
   font-size: 1.5rem;
+  display: inline-block;
 }
 
 .home__tree {
   position: fixed;
   bottom: 0;
-  left: calc(50% + 8rem);
+  left: 50%;
   transform: translateX(-50%);
   opacity: 0.1;
 }
@@ -58,4 +59,18 @@
 .home li .material-icons {
   margin-right: 1rem;
   color: var(--mdc-theme-secondary);
+}
+
+@media (min-width: 769px) {
+  .home__title {
+    font-size: 6.5vw !important;
+  }
+
+  .home__subtitle {
+    margin: 0 0 5rem 0 !important;
+  }
+
+  .home__tree {
+    left: calc(50% + 8rem);
+  }
 }

@@ -13,7 +13,10 @@ export const Home = () => (
       <h1 className="home__title">Redux StateBranch</h1>
       <h2 className="home__subtitle">A redux wrapper for sane people.</h2>
 
-      <code className="home__npm-install">npm install redux-state-branch</code>
+      <code className="home__npm-install">
+        npm&nbsp;install
+        <wbr /> redux-state-branch
+      </code>
 
       <ul>
         <li>
