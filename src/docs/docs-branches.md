@@ -17,7 +17,7 @@ const myBranch = new StateBranch({
   // optional actions
   actions?: typeof Actions,
   // optional selectors
-  actions?: typeof Selectors,
+  selectors?: typeof Selectors,
   // optional defaults for an item
   defaultItem?: Object,
   // optional default initial state
