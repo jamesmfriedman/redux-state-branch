@@ -1,4 +1,8 @@
-import { makeType } from './utils';
+export const makeType = (prefix: string, suffix?: string) =>
+  `${prefix}${suffix ? "/" + suffix : ""}`;
+
+export const ensureArray = (items: any) =>
+  Array.isArray(items) ? items : [items];
 
 export type ItemT<T> = T & { id: string };
 
@@ -60,7 +64,7 @@ export class Actions<T> {
   replace(items: ItemsT<T>, devToolsSuffix?: string) {
     return {
       type: makeType(this.constants.REPLACE, devToolsSuffix),
-      items
+      items: ensureArray(items)
     };
   }
 
@@ -69,24 +73,25 @@ export class Actions<T> {
 
     return {
       type: makeType(this.constants.DELETE, devToolsSuffix),
-      items:
-        typeof wrappedItems[0] === 'string'
+      items: ensureArray(
+        typeof wrappedItems[0] === "string"
           ? (wrappedItems as string[]).map((id: string) => ({ id }))
           : wrappedItems
+      )
     };
   }
 
   create(items?: ItemsT<T>, devToolsSuffix?: string) {
     return {
       type: makeType(this.constants.CREATE, devToolsSuffix),
-      items: items || {}
+      items: ensureArray(items || {})
     };
   }
 
   update(items: ItemsT<T>, devToolsSuffix?: string) {
     return {
       type: makeType(this.constants.UPDATE, devToolsSuffix),
-      items
+      items: ensureArray(items)
     };
   }
 
@@ -151,8 +156,8 @@ export class StateBranch<T, A, S> {
   }
 
   reducer(state: IState = this.defaultState, action: IAction<T>) {
-    const items = Array.isArray(action.items) ? action.items : [action.items];
-    const type = action.type.split('/', 2).join('/');
+    const items = ensureArray(action.items);
+    const type = action.type.split("/", 2).join("/");
 
     switch (type) {
       case this.constants.CREATE:
