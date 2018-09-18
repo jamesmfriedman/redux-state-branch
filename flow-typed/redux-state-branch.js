@@ -39,14 +39,14 @@ declare module 'redux-state-branch' {
     constants: IConstants;
     constructor(constants: IConstants): this;
     replace(
-      items: ItemsShapeTT<T>,
+      items: ItemsShapeT<T>,
       suffix?: string
     ): {
       type: string,
-      items: ItemsShapeTT<T>
+      items: ItemsShapeT<T>
     };
     delete(
-      items: ItemsShapeTT<T> | string | string[],
+      items: ItemsShapeT<T> | string | string[],
       suffix?: string
     ): {
       type: string,
@@ -57,18 +57,18 @@ declare module 'redux-state-branch' {
           }[]
     };
     create(
-      items?: ItemsShapeTT<T>,
+      items?: ItemsShapeT<T>,
       suffix?: string
     ): {
       type: string,
-      items: ItemsShapeTT<T>
+      items: ItemsShapeT<T>
     };
     update(
-      items: ItemsShapeTT<T>,
+      items: ItemsShapeT<T>,
       suffix?: string
     ): {
       type: string,
-      items: ItemsShapeTT<T>
+      items: ItemsShapeT<T>
     };
     setMeta(
       meta: {
