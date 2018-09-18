@@ -36,9 +36,9 @@ declare module 'redux-state-branch' {
       [key: string]: any
     } | void;
   }
-  declare export class Actions<T, C> {
-    constant: ConstantsT<C>;
-    constructor(constants: ConstantsT<C>): this;
+  declare export class Actions<T> {
+    constant: ConstantsT<any>;
+    constructor(constants: ConstantsT<any>): this;
     replace(
       items: ItemsShapeT<T>,
       suffix?: string

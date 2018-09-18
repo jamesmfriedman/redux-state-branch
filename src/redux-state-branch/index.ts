@@ -54,10 +54,10 @@ export class Selectors<T> {
   }
 }
 
-export class Actions<T, C> {
-  protected constant: ConstantsT<C>;
+export class Actions<T> {
+  protected constant: ConstantsT<any>;
 
-  constructor(constants: ConstantsT<C>) {
+  constructor(constants: ConstantsT<any>) {
     this.constant = constants;
   }
 
@@ -111,7 +111,7 @@ export class Actions<T, C> {
 
 interface IStateBranchOpts<T, A, S, C, U> {
   name: string;
-  actions?: new (constants: ConstantsT<C>) => A | Actions<T, C>;
+  actions?: new (constants: ConstantsT<C>) => A | Actions<T>;
   selectors?: new (name: string) => S | Selectors<T>;
   constants?: C;
   utils?: U;
@@ -125,7 +125,7 @@ export class StateBranch<T, A, S, C, U> {
 
   constant: ConstantsT<C>;
   util: U;
-  action: A | Actions<T, C>;
+  action: A | Actions<T>;
   select: S | Selectors<T>;
   defaultItem: { [key: string]: any };
   defaultState: { [key: string]: any };
