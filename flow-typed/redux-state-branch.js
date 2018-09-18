@@ -4,7 +4,7 @@ declare module 'redux-state-branch' {
     id: string
   };
   declare type ItemsT<T> = T | T[];
-  declare type ItemsLike<T> = $Shape<T> | $Shape<T>[];
+  declare type ItemsShapeT<T> = $Shape<T> | $Shape<T>[];
   declare export interface IConstants {
     CREATE: string;
     REPLACE: string;
@@ -39,14 +39,14 @@ declare module 'redux-state-branch' {
     constants: IConstants;
     constructor(constants: IConstants): this;
     replace(
-      items: ItemsLikeT<T>,
+      items: ItemsShapeTT<T>,
       suffix?: string
     ): {
       type: string,
-      items: ItemsLikeT<T>
+      items: ItemsShapeTT<T>
     };
     delete(
-      items: ItemsLikeT<T> | string | string[],
+      items: ItemsShapeTT<T> | string | string[],
       suffix?: string
     ): {
       type: string,
@@ -57,18 +57,18 @@ declare module 'redux-state-branch' {
           }[]
     };
     create(
-      items?: ItemsLikeT<T>,
+      items?: ItemsShapeTT<T>,
       suffix?: string
     ): {
       type: string,
-      items: ItemsLikeT<T>
+      items: ItemsShapeTT<T>
     };
     update(
-      items: ItemsLikeT<T>,
+      items: ItemsShapeTT<T>,
       suffix?: string
     ): {
       type: string,
-      items: ItemsLikeT<T>
+      items: ItemsShapeTT<T>
     };
     setMeta(
       meta: {
