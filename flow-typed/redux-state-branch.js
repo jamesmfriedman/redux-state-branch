@@ -27,7 +27,7 @@ declare module 'redux-state-branch' {
   declare export class Selectors<T> {
     name: string;
     constructor(name: string): this;
-    byId<StateT>(state: StateT, id: string): T | void;
+    byId<StateT>(state: StateT, id?: string): T | void;
     all<StateT>(state: StateT): T[];
     where<StateT>(state: StateT, condition: (item: ItemT<T>) => boolean): T[];
     meta<StateT>(
