@@ -10,15 +10,14 @@ export type ItemsT<T> = T | T[];
 
 export type ID = string;
 
-export interface IConstants {
-  [key: string]: string;
+export type ConstantsT<C> = {
   CREATE: string;
   REPLACE: string;
   UPDATE: string;
   DELETE: string;
   RESET: string;
   SET_META: string;
-}
+} & C;
 
 export interface IAction<T> {
   type: string;
@@ -55,10 +54,10 @@ export class Selectors<T> {
   }
 }
 
-export class Actions<T> {
-  protected constant: IConstants;
+export class Actions<T, C> {
+  protected constant: ConstantsT<C>;
 
-  constructor(constants: IConstants) {
+  constructor(constants: ConstantsT<C>) {
     this.constant = constants;
   }
 
@@ -110,23 +109,23 @@ export class Actions<T> {
   }
 }
 
-interface IStateBranchOpts<T, A, S, U> {
+interface IStateBranchOpts<T, A, S, C, U> {
   name: string;
-  actions?: new (constants: IConstants) => A | Actions<T>;
+  actions?: new (constants: ConstantsT<C>) => A | Actions<T, C>;
   selectors?: new (name: string) => S | Selectors<T>;
-  constants?: { [key: string]: string };
-  utils?: U | {};
+  constants?: C;
+  utils?: U;
   defaultItem?: { [key: string]: any };
   defaultState?: { [key: string]: any };
   reducer?: (state: IState, action: IAction<T>) => IState;
 }
 
-export class StateBranch<T, A, S, U> {
+export class StateBranch<T, A, S, C, U> {
   name: string;
 
-  constant: IConstants;
-  util: U | {};
-  action: A | Actions<T>;
+  constant: ConstantsT<C>;
+  util: U;
+  action: A | Actions<T, C>;
   select: S | Selectors<T>;
   defaultItem: { [key: string]: any };
   defaultState: { [key: string]: any };
@@ -136,15 +135,16 @@ export class StateBranch<T, A, S, U> {
     name,
     actions: ActionsConstructor = Actions,
     selectors: SelectorsConstructor = Selectors,
-    constants = {},
-    utils = {},
+    constants,
+    utils,
     defaultItem = {},
     defaultState = { items: {} },
     reducer = (state, action) => state
-  }: IStateBranchOpts<T, A, S, U>) {
+  }: IStateBranchOpts<T, A, S, C, U>) {
     this.name = name;
 
     this.constant = {
+      // @ts-ignore
       ...constants,
       CREATE: `${name}/CREATE`,
       REPLACE: `${name}/REPLACE`,
@@ -153,7 +153,7 @@ export class StateBranch<T, A, S, U> {
       SET_META: `${name}/SET_META`,
       RESET: `${name}/RESET`
     };
-
+    // @ts-ignore
     this.util = utils;
 
     this.action = new ActionsConstructor(this.constant);

@@ -5,15 +5,15 @@ declare module 'redux-state-branch' {
   };
   declare type ItemsT<T> = T | T[];
   declare type ItemsShapeT<T> = $Shape<T> | $Shape<T>[];
-  declare export interface IConstants {
-    [key: string]: string;
-    CREATE: string;
-    REPLACE: string;
-    UPDATE: string;
-    DELETE: string;
-    RESET: string;
-    SET_META: string;
-  }
+  declare export type ConstantsT<C> = {
+    CREATE: string,
+    REPLACE: string,
+    UPDATE: string,
+    DELETE: string,
+    RESET: string,
+    SET_META: string
+  } & C;
+
   declare export interface IAction<T> {
     type: string;
     items: ItemsT<T>;
@@ -36,9 +36,9 @@ declare module 'redux-state-branch' {
       [key: string]: any
     } | void;
   }
-  declare export class Actions<T> {
-    constant: IConstants;
-    constructor(constants: IConstants): this;
+  declare export class Actions<T, C> {
+    constant: ConstantsT<C>;
+    constructor(constants: ConstantsT<C>): this;
     replace(
       items: ItemsShapeT<T>,
       suffix?: string
@@ -88,12 +88,12 @@ declare module 'redux-state-branch' {
       type: string
     };
   }
-  declare interface IStateBranchOpts<T, A, S, U> {
+  declare interface IStateBranchOpts<T, A, S, C, U> {
     name: string;
     actions?: Class<A>;
     selectors?: Class<S>;
-    constants?: { [key: string]: string };
-    utils?: U | {};
+    constants?: C;
+    utils?: U;
     defaultItem?: {
       [key: string]: any
     };
@@ -102,10 +102,10 @@ declare module 'redux-state-branch' {
     };
     reducer?: (state: IState, action: IAction<T>) => IState;
   }
-  declare export class StateBranch<T, A, S, U> {
+  declare export class StateBranch<T, A, S, C, U> {
     name: string;
-    constant: IConstants;
-    util: U | {};
+    constant: ConstantsT<C>;
+    util: U;
     action: A;
     select: S;
     defaultItem: {
@@ -115,7 +115,7 @@ declare module 'redux-state-branch' {
       [key: string]: any
     };
     extendedReducer: (state: IState, action: IAction<T>) => IState;
-    constructor(opts: IStateBranchOpts<T, A, S, U>): this;
+    constructor(opts: IStateBranchOpts<T, A, S, C, U>): this;
     reducer(state: IState | void, action: IAction<T>): IState;
   }
 }
