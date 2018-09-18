@@ -135,10 +135,8 @@ export class StateBranch<T, A, S, C, U> {
     name,
     actions: ActionsConstructor = Actions,
     selectors: SelectorsConstructor = Selectors,
-    // @ts-ignore
-    constants = {},
-    // @ts-ignore
-    utils = {},
+    constants,
+    utils,
     defaultItem = {},
     defaultState = { items: {} },
     reducer = (state, action) => state
@@ -155,7 +153,7 @@ export class StateBranch<T, A, S, C, U> {
       SET_META: `${name}/SET_META`,
       RESET: `${name}/RESET`
     };
-
+    // @ts-ignore
     this.util = utils;
 
     this.action = new ActionsConstructor(this.constant);
