@@ -6,6 +6,7 @@ declare module 'redux-state-branch' {
   declare type ItemsT<T> = T | T[];
   declare type ItemsShapeT<T> = $Shape<T> | $Shape<T>[];
   declare export interface IConstants {
+    [key: string]: string;
     CREATE: string;
     REPLACE: string;
     UPDATE: string;
@@ -36,7 +37,7 @@ declare module 'redux-state-branch' {
     } | void;
   }
   declare export class Actions<T> {
-    constants: IConstants;
+    constant: IConstants;
     constructor(constants: IConstants): this;
     replace(
       items: ItemsShapeT<T>,
@@ -87,10 +88,12 @@ declare module 'redux-state-branch' {
       type: string
     };
   }
-  declare interface IStateBranchOpts<T, A, S> {
+  declare interface IStateBranchOpts<T, A, S, U> {
     name: string;
     actions?: Class<A>;
     selectors?: Class<S>;
+    constants?: { [key: string]: string };
+    utils?: U | {};
     defaultItem?: {
       [key: string]: any
     };
@@ -99,9 +102,10 @@ declare module 'redux-state-branch' {
     };
     reducer?: (state: IState, action: IAction<T>) => IState;
   }
-  declare export class StateBranch<T, A, S> {
+  declare export class StateBranch<T, A, S, U> {
     name: string;
-    constants: IConstants;
+    constant: IConstants;
+    util: U | {};
     action: A;
     select: S;
     defaultItem: {
@@ -111,7 +115,7 @@ declare module 'redux-state-branch' {
       [key: string]: any
     };
     extendedReducer: (state: IState, action: IAction<T>) => IState;
-    constructor(opts: IStateBranchOpts<T, A, S>): this;
+    constructor(opts: IStateBranchOpts<T, A, S, U>): this;
     reducer(state: IState | void, action: IAction<T>): IState;
   }
 }

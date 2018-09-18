@@ -11,6 +11,7 @@ export type ItemsT<T> = T | T[];
 export type ID = string;
 
 export interface IConstants {
+  [key: string]: string;
   CREATE: string;
   REPLACE: string;
   UPDATE: string;
@@ -55,15 +56,15 @@ export class Selectors<T> {
 }
 
 export class Actions<T> {
-  protected constants: IConstants;
+  protected constant: IConstants;
 
   constructor(constants: IConstants) {
-    this.constants = constants;
+    this.constant = constants;
   }
 
   replace(items: ItemsT<T>, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.REPLACE, devToolsSuffix),
+      type: makeType(this.constant.REPLACE, devToolsSuffix),
       items: ensureArray(items)
     };
   }
@@ -72,7 +73,7 @@ export class Actions<T> {
     const wrappedItems = !Array.isArray(items) ? [items] : items;
 
     return {
-      type: makeType(this.constants.DELETE, devToolsSuffix),
+      type: makeType(this.constant.DELETE, devToolsSuffix),
       items: ensureArray(
         typeof wrappedItems[0] === "string"
           ? (wrappedItems as string[]).map((id: string) => ({ id }))
@@ -83,45 +84,48 @@ export class Actions<T> {
 
   create(items?: ItemsT<T>, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.CREATE, devToolsSuffix),
+      type: makeType(this.constant.CREATE, devToolsSuffix),
       items: ensureArray(items || {})
     };
   }
 
   update(items: ItemsT<T>, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.UPDATE, devToolsSuffix),
+      type: makeType(this.constant.UPDATE, devToolsSuffix),
       items: ensureArray(items)
     };
   }
 
   setMeta(meta: { [key: string]: any }, devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.SET_META, devToolsSuffix),
+      type: makeType(this.constant.SET_META, devToolsSuffix),
       meta
     };
   }
 
   reset(devToolsSuffix?: string) {
     return {
-      type: makeType(this.constants.RESET, devToolsSuffix)
+      type: makeType(this.constant.RESET, devToolsSuffix)
     };
   }
 }
 
-interface IStateBranchOpts<T, A, S> {
+interface IStateBranchOpts<T, A, S, U> {
   name: string;
   actions?: new (constants: IConstants) => A | Actions<T>;
   selectors?: new (name: string) => S | Selectors<T>;
+  constants?: { [key: string]: string };
+  utils?: U | {};
   defaultItem?: { [key: string]: any };
   defaultState?: { [key: string]: any };
   reducer?: (state: IState, action: IAction<T>) => IState;
 }
 
-export class StateBranch<T, A, S> {
+export class StateBranch<T, A, S, U> {
   name: string;
 
-  constants: IConstants;
+  constant: IConstants;
+  util: U | {};
   action: A | Actions<T>;
   select: S | Selectors<T>;
   defaultItem: { [key: string]: any };
@@ -132,13 +136,16 @@ export class StateBranch<T, A, S> {
     name,
     actions: ActionsConstructor = Actions,
     selectors: SelectorsConstructor = Selectors,
+    constants = {},
+    utils = {},
     defaultItem = {},
     defaultState = { items: {} },
     reducer = (state, action) => state
-  }: IStateBranchOpts<T, A, S>) {
+  }: IStateBranchOpts<T, A, S, U>) {
     this.name = name;
 
-    this.constants = {
+    this.constant = {
+      ...constants,
       CREATE: `${name}/CREATE`,
       REPLACE: `${name}/REPLACE`,
       UPDATE: `${name}/UPDATE`,
@@ -147,7 +154,9 @@ export class StateBranch<T, A, S> {
       RESET: `${name}/RESET`
     };
 
-    this.action = new ActionsConstructor(this.constants);
+    this.util = utils;
+
+    this.action = new ActionsConstructor(this.constant);
     this.select = new SelectorsConstructor(this.name);
     this.reducer = this.reducer.bind(this);
     this.defaultItem = defaultItem;
@@ -160,10 +169,10 @@ export class StateBranch<T, A, S> {
     const type = action.type.split("/", 2).join("/");
 
     switch (type) {
-      case this.constants.CREATE:
+      case this.constant.CREATE:
         const newCreateItems = items.reduce((acc, item: ItemT<T>) => {
           if (item.id === undefined) {
-            if (action.type === this.constants.CREATE) {
+            if (action.type === this.constant.CREATE) {
               item.id = `-${Math.random()
                 .toString(16)
                 .slice(2)}`;
@@ -184,7 +193,7 @@ export class StateBranch<T, A, S> {
             ...newCreateItems
           }
         };
-      case this.constants.UPDATE:
+      case this.constant.UPDATE:
         const newUpdateItems = items.reduce((acc, item: ItemT<T>) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
@@ -200,7 +209,7 @@ export class StateBranch<T, A, S> {
             ...newUpdateItems
           }
         };
-      case this.constants.REPLACE:
+      case this.constant.REPLACE:
         const newReplaceItems = items.reduce((acc, item: ItemT<T>) => {
           acc[item.id] = item;
           return acc;
@@ -213,7 +222,7 @@ export class StateBranch<T, A, S> {
             ...newReplaceItems
           }
         };
-      case this.constants.DELETE:
+      case this.constant.DELETE:
         const newDeleteItems = items.reduce(
           (acc, item: ItemT<T>) => {
             delete acc[item.id];
@@ -226,12 +235,12 @@ export class StateBranch<T, A, S> {
           ...state,
           items: newDeleteItems
         };
-      case this.constants.SET_META:
+      case this.constant.SET_META:
         return {
           ...state,
           ...action.meta
         };
-      case this.constants.RESET:
+      case this.constant.RESET:
         return this.defaultState;
       default:
         return this.extendedReducer(state, action);
