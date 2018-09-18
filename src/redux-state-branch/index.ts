@@ -36,8 +36,8 @@ export class Selectors<T> {
     this.name = name;
   }
 
-  byId(state: IState, id: ID): T | void {
-    return state[this.name].items[id];
+  byId(state: IState, id?: ID): T | void {
+    return state[this.name].items[id || ""];
   }
 
   all(state: IState): T[] {
