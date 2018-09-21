@@ -24,17 +24,13 @@ declare module 'redux-state-branch' {
   declare export interface IState {
     [key: string]: any;
   }
-  declare export class Selectors<T> {
+  declare export class Selectors<T, BranchT> {
     name: string;
     constructor(name: string): this;
     byId<StateT>(state: StateT, id?: string): T | void;
     all<StateT>(state: StateT): T[];
     where<StateT>(state: StateT, condition: (item: ItemT<T>) => boolean): T[];
-    meta<StateT>(
-      state: StateT
-    ): {
-      [key: string]: any
-    } | void;
+    meta<StateT>(state: StateT): BranchT;
   }
   declare export class Actions<T> {
     constant: ConstantsT<any>;
@@ -88,7 +84,7 @@ declare module 'redux-state-branch' {
       type: string
     };
   }
-  declare interface IStateBranchOpts<T, A, S, C, U> {
+  declare interface IStateBranchOpts<T, A, S, C, U, B> {
     name: string;
     actions?: Class<A>;
     selectors?: Class<S>;
@@ -102,7 +98,7 @@ declare module 'redux-state-branch' {
     };
     reducer?: (state: IState, action: IAction<T>) => IState;
   }
-  declare export class StateBranch<T, A, S, C, U> {
+  declare export class StateBranch<T, A, S, C, U, B> {
     name: string;
     constant: ConstantsT<C>;
     util: U;
@@ -115,7 +111,7 @@ declare module 'redux-state-branch' {
       [key: string]: any
     };
     extendedReducer: (state: IState, action: IAction<T>) => IState;
-    constructor(opts: IStateBranchOpts<T, A, S, C, U>): this;
+    constructor(opts: IStateBranchOpts<T, A, S, C, U, B>): this;
     reducer(state: IState | void, action: IAction<T>): IState;
   }
 }

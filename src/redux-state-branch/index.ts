@@ -6,7 +6,7 @@ export const ensureArray = (items: any) =>
 
 export type ItemT<T> = T & { id: string };
 
-export type ItemsT<T> = T | T[];
+export type ItemsT<T> = Partial<T> | Array<Partial<T>>;
 
 export type ID = string;
 
@@ -29,28 +29,27 @@ export interface IState {
   [key: string]: any;
 }
 
-export class Selectors<T> {
+export class Selectors<T, BranchT> {
   protected name: string;
 
   constructor(name: string) {
     this.name = name;
   }
 
-  byId(state: IState, id?: ID): T | void {
+  byId<StateT>(state: StateT, id?: ID): T | void {
     return state[this.name].items[id || ""];
   }
 
-  all(state: IState): T[] {
+  all<StateT>(state: StateT): T[] {
     return Object.values(state[this.name].items);
   }
 
-  where(state: IState, condition: (item: ItemT<T>) => boolean): T[] {
+  where<StateT>(state: StateT, condition: (item: ItemT<T>) => boolean): T[] {
     return this.all(state).filter(condition);
   }
 
-  meta(state: IState): { [key: string]: any } | void {
-    const { items, ...meta } = state[this.name];
-    return meta;
+  meta<StateT>(state: StateT): BranchT {
+    return state[this.name];
   }
 }
 
@@ -109,10 +108,10 @@ export class Actions<T> {
   }
 }
 
-interface IStateBranchOpts<T, A, S, C, U> {
+interface IStateBranchOpts<T, A, S, C, U, B> {
   name: string;
   actions?: new (constants: ConstantsT<C>) => A | Actions<T>;
-  selectors?: new (name: string) => S | Selectors<T>;
+  selectors?: new (name: string) => S | Selectors<T, B>;
   constants?: C;
   utils?: U;
   defaultItem?: { [key: string]: any };
@@ -120,13 +119,13 @@ interface IStateBranchOpts<T, A, S, C, U> {
   reducer?: (state: IState, action: IAction<T>) => IState;
 }
 
-export class StateBranch<T, A, S, C, U> {
+export class StateBranch<T, A, S, C, U, B> {
   name: string;
 
   constant: ConstantsT<C>;
   util: U;
   action: A | Actions<T>;
-  select: S | Selectors<T>;
+  select: S | Selectors<T, B>;
   defaultItem: { [key: string]: any };
   defaultState: { [key: string]: any };
   protected extendedReducer: (state: IState, action: IAction<T>) => IState;
@@ -140,7 +139,7 @@ export class StateBranch<T, A, S, C, U> {
     defaultItem = {},
     defaultState = { items: {} },
     reducer = (state, action) => state
-  }: IStateBranchOpts<T, A, S, C, U>) {
+  }: IStateBranchOpts<T, A, S, C, U, B>) {
     this.name = name;
 
     this.constant = {
