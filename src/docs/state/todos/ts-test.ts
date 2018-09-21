@@ -120,7 +120,11 @@ const state = {
   }
 };
 
-// const a = todosBranch.select.byId(state, "1");
-// const b = todosBranch.select.all(state);
-// const c = todosBranch.select.where(state, () => true);
-// const d = todosBranch.select.meta(state).loading;
+// @ts-ignore
+const a = todosBranch.select.byId(state, "1");
+// @ts-ignore
+const b = todosBranch.select.all(state);
+// @ts-ignore
+const c = todosBranch.select.where(state, () => true);
+// @ts-ignore
+const d = todosBranch.select.meta(state).loading;
