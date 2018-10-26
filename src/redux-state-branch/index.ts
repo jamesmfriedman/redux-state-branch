@@ -87,22 +87,18 @@ export class Actions<T> {
   }
 
   create(items?: ItemsT<T>, devToolsSuffix?: string) {
-    const newCreateItems = ensureArray(items || {}).reduce(
-      (acc, item: ItemT<T>) => {
-        if (item.id === undefined) {
-          item.id = `-${Math.random()
-            .toString(16)
-            .slice(2)}`;
-        }
+    const newCreateItems = ensureArray(items || {}).map((item: ItemT<T>) => {
+      if (item.id === undefined) {
+        item.id = `-${Math.random()
+          .toString(16)
+          .slice(2)}`;
+      }
 
-        acc[item.id] = {
-          ...this.defaultItem,
-          ...(item as any)
-        };
-        return acc;
-      },
-      {}
-    );
+      return {
+        ...this.defaultItem,
+        ...(item as any)
+      };
+    });
 
     return {
       type: makeType(this.constant.CREATE, devToolsSuffix),
