@@ -188,11 +188,19 @@ export class StateBranch<T, A, S, C, U, B> {
 
     switch (type) {
       case this.constant.CREATE:
+        const newCreateItems = items.reduce((acc, item: ItemT<T>) => {
+          acc[item.id] = {
+            ...(state.items[item.id] || {}),
+            ...(item as any)
+          };
+          return acc;
+        }, {});
+
         return {
           ...state,
           items: {
             ...state.items,
-            ...items
+            ...newCreateItems
           }
         };
       case this.constant.UPDATE:
