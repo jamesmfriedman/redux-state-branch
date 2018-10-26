@@ -4,6 +4,10 @@ export const makeType = (prefix: string, suffix?: string) =>
 export const ensureArray = (items: any) =>
   Array.isArray(items) ? items : [items];
 
+export interface MapT {
+  [key: string]: any;
+}
+
 export type ItemT<T> = T & { id: string };
 
 export type ItemsT<T> = Partial<T> | Array<Partial<T>>;
@@ -22,7 +26,7 @@ export type ConstantsT<C> = {
 export interface IAction<T> {
   type: string;
   items: ItemsT<T>;
-  meta: { [key: string]: any };
+  meta: MapT;
 }
 
 export interface IState {
@@ -55,9 +59,11 @@ export class Selectors<T, BranchT> {
 
 export class Actions<T> {
   protected constant: ConstantsT<any>;
+  protected defaultItem: any;
 
-  constructor(constants: ConstantsT<any>) {
+  constructor(constants: ConstantsT<any>, defaultItem: any) {
     this.constant = constants;
+    this.defaultItem = defaultItem;
   }
 
   replace(items: ItemsT<T>, devToolsSuffix?: string) {
@@ -81,9 +87,26 @@ export class Actions<T> {
   }
 
   create(items?: ItemsT<T>, devToolsSuffix?: string) {
+    const newCreateItems = ensureArray(items || {}).reduce(
+      (acc, item: ItemT<T>) => {
+        if (item.id === undefined) {
+          item.id = `-${Math.random()
+            .toString(16)
+            .slice(2)}`;
+        }
+
+        acc[item.id] = {
+          ...this.defaultItem,
+          ...(item as any)
+        };
+        return acc;
+      },
+      {}
+    );
+
     return {
       type: makeType(this.constant.CREATE, devToolsSuffix),
-      items: ensureArray(items || {})
+      items: newCreateItems
     };
   }
 
@@ -94,7 +117,7 @@ export class Actions<T> {
     };
   }
 
-  setMeta(meta: { [key: string]: any }, devToolsSuffix?: string) {
+  setMeta(meta: MapT, devToolsSuffix?: string) {
     return {
       type: makeType(this.constant.SET_META, devToolsSuffix),
       meta
@@ -110,12 +133,12 @@ export class Actions<T> {
 
 interface IStateBranchOpts<T, A, S, C, U, B> {
   name: string;
-  actions?: new (constants: ConstantsT<C>) => A | Actions<T>;
+  actions?: new (constants: ConstantsT<C>, defaultItem: MapT) => A | Actions<T>;
   selectors?: new (name: string) => S | Selectors<T, B>;
   constants?: C;
   utils?: U;
-  defaultItem?: { [key: string]: any };
-  defaultState?: { [key: string]: any };
+  defaultItem?: MapT;
+  defaultState?: MapT;
   reducer?: (state: IState, action: IAction<T>) => IState;
 }
 
@@ -126,8 +149,8 @@ export class StateBranch<T, A, S, C, U, B> {
   util: U;
   action: A | Actions<T>;
   select: S | Selectors<T, B>;
-  defaultItem: { [key: string]: any };
-  defaultState: { [key: string]: any };
+  defaultItem: MapT;
+  defaultState: MapT;
   protected extendedReducer: (state: IState, action: IAction<T>) => IState;
 
   constructor({
@@ -155,12 +178,12 @@ export class StateBranch<T, A, S, C, U, B> {
     // @ts-ignore
     this.util = utils;
 
-    this.action = new ActionsConstructor(this.constant);
-    this.select = new SelectorsConstructor(this.name);
-    this.reducer = this.reducer.bind(this);
     this.defaultItem = defaultItem;
+    this.reducer = this.reducer.bind(this);
     this.defaultState = defaultState;
     this.extendedReducer = reducer;
+    this.action = new ActionsConstructor(this.constant, this.defaultItem);
+    this.select = new SelectorsConstructor(this.name);
   }
 
   reducer(state: IState = this.defaultState, action: IAction<T>) {
@@ -169,27 +192,11 @@ export class StateBranch<T, A, S, C, U, B> {
 
     switch (type) {
       case this.constant.CREATE:
-        const newCreateItems = items.reduce((acc, item: ItemT<T>) => {
-          if (item.id === undefined) {
-            if (action.type === this.constant.CREATE) {
-              item.id = `-${Math.random()
-                .toString(16)
-                .slice(2)}`;
-            }
-          }
-
-          acc[item.id] = {
-            ...this.defaultItem,
-            ...(item as any)
-          };
-          return acc;
-        }, {});
-
         return {
           ...state,
           items: {
             ...state.items,
-            ...newCreateItems
+            ...items
           }
         };
       case this.constant.UPDATE:

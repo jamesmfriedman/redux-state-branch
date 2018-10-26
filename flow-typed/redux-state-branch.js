@@ -1,5 +1,9 @@
 // @flow
 declare module 'redux-state-branch' {
+  declare type MapT = {
+    [key: string]: any
+  };
+
   declare type ItemT<T> = T & {
     id: string
   };
@@ -17,9 +21,7 @@ declare module 'redux-state-branch' {
   declare export interface IAction<T> {
     type: string;
     items: ItemsT<T>;
-    meta: {
-      [key: string]: any
-    };
+    meta: MapT;
   }
   declare export interface IState {
     [key: string]: any;
@@ -68,15 +70,11 @@ declare module 'redux-state-branch' {
       items: ItemsShapeT<T>
     };
     setMeta(
-      meta: {
-        [key: string]: any
-      },
+      meta: MapT,
       suffix?: string
     ): {
       type: string,
-      meta: {
-        [key: string]: any
-      }
+      meta: MapT
     };
     reset(
       suffix?: string
@@ -90,12 +88,8 @@ declare module 'redux-state-branch' {
     selectors?: Class<S>;
     constants?: C;
     utils?: U;
-    defaultItem?: {
-      [key: string]: any
-    };
-    defaultState?: {
-      [key: string]: any
-    };
+    defaultItem?: MapT;
+    defaultState?: MapT;
     reducer?: (state: IState, action: IAction<T>) => IState;
   }
   declare export class StateBranch<T, A, S, C, U, B> {
@@ -104,12 +98,8 @@ declare module 'redux-state-branch' {
     util: U;
     action: A;
     select: S;
-    defaultItem: {
-      [key: string]: any
-    };
-    defaultState: {
-      [key: string]: any
-    };
+    defaultItem: MapT;
+    defaultState: MapT;
     extendedReducer: (state: IState, action: IAction<T>) => IState;
     constructor(opts: IStateBranchOpts<T, A, S, C, U, B>): this;
     reducer(state: IState | void, action: IAction<T>): IState;
