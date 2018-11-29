@@ -33,6 +33,17 @@ export interface IState {
   [key: string]: any;
 }
 
+export const generateId = (): string => {
+  return ([1e7].toString() + -1e3 + -4e3 + -8e3 + -1e11).replace(
+    /[018]/g,
+    (c: any) =>
+      (
+        c ^
+        (window.crypto.getRandomValues(new Uint8Array(1))[0] & (15 >> (c / 4)))
+      ).toString(16)
+  );
+};
+
 export class Selectors<T, BranchT> {
   protected name: string;
 
@@ -89,9 +100,7 @@ export class Actions<T> {
   create(items?: ItemsT<T>, devToolsSuffix?: string) {
     const newCreateItems = ensureArray(items || {}).map((item: ItemT<T>) => {
       if (item.id === undefined) {
-        item.id = `-${Math.random()
-          .toString(16)
-          .slice(2)}`;
+        item.id = generateId();
       }
 
       return {
