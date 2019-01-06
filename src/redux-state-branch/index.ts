@@ -4,8 +4,8 @@ export const makeType = (prefix: string, suffix?: string) =>
 export const ensureArray = (items: any) =>
   Array.isArray(items) ? items : [items];
 
-export interface MapT {
-  [key: string]: any;
+export interface MappedT<T = any> {
+  [key: string]: T;
 }
 
 export type ItemT<T> = T & { id: string };
@@ -26,7 +26,7 @@ export type ConstantsT<C> = {
 export interface IAction<T> {
   type: string;
   items: ItemsT<T>;
-  meta: MapT;
+  meta: MappedT;
 }
 
 export interface IState {
@@ -44,26 +44,29 @@ export const generateId = (): string => {
   );
 };
 
-export class Selectors<T, BranchT> {
+export class Selectors<ItemType, BranchType> {
   protected name: string;
 
   constructor(name: string) {
     this.name = name;
   }
 
-  byId<StateT>(state: StateT, id?: ID): T | void {
+  byId<StateT>(state: StateT, id?: ID): ItemType | undefined {
     return state[this.name].items[id || ""];
   }
 
-  all<StateT>(state: StateT): T[] {
+  all<StateT>(state: StateT): ItemType[] {
     return Object.values(state[this.name].items);
   }
 
-  where<StateT>(state: StateT, condition: (item: ItemT<T>) => boolean): T[] {
+  where<StateT>(
+    state: StateT,
+    condition: (item: ItemT<ItemType>) => boolean
+  ): ItemType[] {
     return this.all(state).filter(condition);
   }
 
-  meta<StateT>(state: StateT): BranchT {
+  meta<StateT>(state: StateT): BranchType {
     return state[this.name];
   }
 }
@@ -122,7 +125,7 @@ export class Actions<T> {
     };
   }
 
-  setMeta(meta: MapT, devToolsSuffix?: string) {
+  setMeta(meta: MappedT, devToolsSuffix?: string) {
     return {
       type: makeType(this.constant.SET_META, devToolsSuffix),
       meta
@@ -136,42 +139,71 @@ export class Actions<T> {
   }
 }
 
-interface IStateBranchOpts<T, A, S, C, U, B> {
+interface IStateBranchOpts<
+  BranchStateType,
+  ItemType,
+  ActionsType = Actions<ItemType>,
+  SelectorsType = Selectors<ItemType, BranchStateType>,
+  ConstantsType = {},
+  UtilsType = {}
+> {
   name: string;
-  actions?: new (constants: ConstantsT<C>, defaultItem: MapT) => A | Actions<T>;
-  selectors?: new (name: string) => S | Selectors<T, B>;
-  constants?: C;
-  utils?: U;
-  defaultItem?: MapT;
-  defaultState?: MapT;
-  reducer?: (state: IState, action: IAction<T>) => IState;
+  actions?: new (
+    constants: ConstantsT<ConstantsType>,
+    defaultItem: MappedT
+  ) => ActionsType;
+  selectors?: new (name: string) => SelectorsType;
+  constants?: ConstantsType;
+  utils?: UtilsType;
+  defaultItem?: MappedT;
+  defaultState?: MappedT;
+  reducer?: (state: IState, action: IAction<ItemType>) => IState;
 }
 
-export class StateBranch<T, A, S, C, U, B> {
+export class StateBranch<
+  ItemType,
+  BranchStateType,
+  ActionsType = Actions<ItemType>,
+  SelectorsType = Selectors<ItemType, BranchStateType>,
+  ConstantsType = {},
+  UtilsType = {}
+> {
   name: string;
 
-  constant: ConstantsT<C>;
-  util: U;
-  action: A | Actions<T>;
-  select: S | Selectors<T, B>;
-  defaultItem: MapT;
-  defaultState: MapT;
-  protected extendedReducer: (state: IState, action: IAction<T>) => IState;
+  constant: ConstantsT<ConstantsType>;
+  util: UtilsType;
+  action: ActionsType;
+  select: SelectorsType;
+  defaultItem: MappedT;
+  defaultState: MappedT;
+  protected extendedReducer: (
+    state: IState,
+    action: IAction<ItemType>
+  ) => IState;
 
   constructor({
     name,
+    // @ts-ignore
     actions: ActionsConstructor = Actions,
+    // @ts-ignore
     selectors: SelectorsConstructor = Selectors,
     constants,
     utils,
     defaultItem = {},
     defaultState = { items: {} },
     reducer = (state, action) => state
-  }: IStateBranchOpts<T, A, S, C, U, B>) {
+  }: IStateBranchOpts<
+    BranchStateType,
+    ItemType,
+    ActionsType,
+    SelectorsType,
+    ConstantsType,
+    UtilsType
+  >) {
     this.name = name;
 
+    // @ts-ignore
     this.constant = {
-      // @ts-ignore
       ...constants,
       CREATE: `${name}/CREATE`,
       REPLACE: `${name}/REPLACE`,
@@ -191,13 +223,13 @@ export class StateBranch<T, A, S, C, U, B> {
     this.select = new SelectorsConstructor(this.name);
   }
 
-  reducer(state: IState = this.defaultState, action: IAction<T>) {
+  reducer(state: IState = this.defaultState, action: IAction<ItemType>) {
     const items = ensureArray(action.items);
     const type = action.type.split("/", 2).join("/");
 
     switch (type) {
       case this.constant.CREATE:
-        const newCreateItems = items.reduce((acc, item: ItemT<T>) => {
+        const newCreateItems = items.reduce((acc, item: ItemT<ItemType>) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
             ...(item as any)
@@ -213,7 +245,7 @@ export class StateBranch<T, A, S, C, U, B> {
           }
         };
       case this.constant.UPDATE:
-        const newUpdateItems = items.reduce((acc, item: ItemT<T>) => {
+        const newUpdateItems = items.reduce((acc, item: ItemT<ItemType>) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
             ...(item as any)
@@ -229,7 +261,7 @@ export class StateBranch<T, A, S, C, U, B> {
           }
         };
       case this.constant.REPLACE:
-        const newReplaceItems = items.reduce((acc, item: ItemT<T>) => {
+        const newReplaceItems = items.reduce((acc, item: ItemT<ItemType>) => {
           acc[item.id] = item;
           return acc;
         }, {});
@@ -243,7 +275,7 @@ export class StateBranch<T, A, S, C, U, B> {
         };
       case this.constant.DELETE:
         const newDeleteItems = items.reduce(
-          (acc, item: ItemT<T>) => {
+          (acc, item: ItemT<ItemType>) => {
             delete acc[item.id];
             return acc;
           },
