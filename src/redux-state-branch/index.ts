@@ -187,7 +187,8 @@ export class StateBranch<
     actions: ActionsConstructor = Actions,
     // @ts-ignore
     selectors: SelectorsConstructor = Selectors,
-    constants,
+    // @ts-ignore
+    constants = {},
     utils,
     defaultItem = {},
     defaultState = { items: {} },
@@ -202,7 +203,6 @@ export class StateBranch<
   >) {
     this.name = name;
 
-    // @ts-ignore
     this.constant = {
       ...constants,
       CREATE: `${name}/CREATE`,
