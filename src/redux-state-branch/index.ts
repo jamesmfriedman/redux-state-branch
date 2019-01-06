@@ -204,6 +204,7 @@ export class StateBranch<
     this.name = name;
 
     this.constant = {
+      // @ts-ignore
       ...constants,
       CREATE: `${name}/CREATE`,
       REPLACE: `${name}/REPLACE`,
