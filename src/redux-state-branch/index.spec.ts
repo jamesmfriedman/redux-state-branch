@@ -46,6 +46,18 @@ describe('StateBranch', () => {
   });
 });
 
+describe('ID Generation', () => {
+  const customIdBranch = new StateBranch<{ id: string }>({
+    name: PREFIX,
+    generateId: () => 'custom-id'
+  });
+
+  it('customId', () => {
+    const action = customIdBranch.action.create({});
+    expect(action.items[0].id).toBe('custom-id');
+  });
+});
+
 describe('Constants', () => {
   it('CREATE', () => {
     expect(branch.constant.CREATE).toBe(`${PREFIX}/CREATE`);

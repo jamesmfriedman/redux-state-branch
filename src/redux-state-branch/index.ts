@@ -97,11 +97,17 @@ export class Actions<
   BranchStateT extends State<ItemT> = State<ItemT>
 > {
   protected constant: Constants;
-  protected defaultItem: any;
+  protected defaultItem: ItemT;
+  protected generateId: () => string;
 
-  constructor(constants: Constants, defaultItem: ItemT) {
+  constructor(
+    constants: Constants,
+    defaultItem: ItemT,
+    generateId: () => string
+  ) {
     this.constant = constants;
     this.defaultItem = defaultItem;
+    this.generateId = generateId;
   }
 
   replace(items: ItemsT<ItemT>, devToolsSuffix?: string) {
@@ -128,12 +134,12 @@ export class Actions<
     const ensureItem = (items || {}) as ItemT;
     const newCreateItems = ensureArray<ItemT>(ensureItem).map((item: ItemT) => {
       if (item.id === undefined) {
-        item.id = generateId();
+        item.id = this.generateId();
       }
 
       return {
         ...this.defaultItem,
-        ...(item as any)
+        ...item
       };
     });
 
@@ -197,16 +203,22 @@ export class StateBranch<
     // @ts-ignore
     defaultItem = {},
     defaultState = { items: {} } as BranchStateT,
-    reducer = (state, action) => state
+    reducer = (state, action) => state,
+    generateId: customGenerateIdFunc = generateId
   }: {
     name: string;
-    actions?: new (constants: Constants, defaultItem: ItemT) => ActionsT;
+    actions?: new (
+      constants: Constants,
+      defaultItem: ItemT,
+      generateId: () => string
+    ) => ActionsT;
     selectors?: new (name: string) => SelectorsT;
     constants?: ConstantsT;
     utils?: UtilsT;
     defaultItem?: ItemT;
     defaultState?: BranchStateT;
     reducer?: (state: State<ItemT>, action: IAction<ItemT>) => State<ItemT>;
+    generateId?: () => string;
   }) {
     this.name = name;
 
@@ -229,7 +241,11 @@ export class StateBranch<
     this.reducer = this.reducer.bind(this);
     this.defaultState = defaultState;
     this.extendedReducer = reducer;
-    this.action = new ActionsConstructor(this.constant, this.defaultItem);
+    this.action = new ActionsConstructor(
+      this.constant,
+      this.defaultItem,
+      customGenerateIdFunc
+    );
     this.select = new SelectorsConstructor(this.name);
   }
 
@@ -246,7 +262,7 @@ export class StateBranch<
         const newCreateItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
-            ...(item as any)
+            ...item
           };
           return acc;
         }, {});
@@ -262,7 +278,7 @@ export class StateBranch<
         const newUpdateItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
-            ...(item as any)
+            ...item
           };
           return acc;
         }, {});
