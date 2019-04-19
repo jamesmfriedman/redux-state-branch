@@ -13,6 +13,7 @@
     "build": "./scripts/build.sh",
     "build:docs": "rm -R -f docs && react-app-rewired build --scripts-version react-scripts-ts && mv build docs",
     "test": "react-app-rewired test --scripts-version react-scripts-ts --env=jsdom",
+    "preversion": "npm run test",
     "version": "npm run build",
     "eject": "react-scripts-ts eject"
   },
@@ -24,7 +25,6 @@
     "@types/react-redux": "^6.0.6",
     "@types/react-router-dom": "^4.3.0",
     "@types/react-test-renderer": "^16.0.2",
-    "@types/redux": "^3.6.0",
     "@types/redux-thunk": "^2.1.0",
     "flowgen": "^1.2.2",
     "normalize.css": "^8.0.0",
