@@ -1,6 +1,6 @@
 {
   "name": "redux-state-branch",
-  "version": "0.0.24",
+  "version": "0.0.25",
   "private": false,
   "description": "A redux wrapper for sane people.",
   "homepage": "https://jamesmfriedman.github.io/redux-state-branch/",
@@ -13,7 +13,7 @@
     "build": "./scripts/build.sh",
     "build:docs": "rm -R -f docs && react-app-rewired build --scripts-version react-scripts-ts && mv build docs",
     "test": "react-app-rewired test --scripts-version react-scripts-ts --env=jsdom",
-    "preversion": "npm run test",
+    "preversion": "export CI=true && npm run test",
     "version": "npm run build",
     "eject": "react-scripts-ts eject"
   },
