@@ -68,7 +68,10 @@ export const resetAllBranches = (): AnyAction => ({
 /**
  * Selectors
  */
-export class Selectors<ItemT, BranchType> {
+export class Selectors<
+  ItemT extends AnyItem,
+  BranchStateT extends State<ItemT> = State<ItemT>
+> {
   protected name: string;
 
   constructor(name: string) {
@@ -87,7 +90,7 @@ export class Selectors<ItemT, BranchType> {
     return this.all(state).filter(condition);
   }
 
-  meta<StateT>(state: StateT): BranchType {
+  meta<StateT>(state: StateT): BranchStateT {
     return state[this.name];
   }
 }
