@@ -1,39 +1,51 @@
-export const makeType = (prefix: string, suffix?: string) =>
-  `${prefix}${suffix ? "/" + suffix : ""}`;
-
-export const ensureArray = (items: any) =>
-  Array.isArray(items) ? items : [items];
-
-export interface MappedT<T = any> {
-  [key: string]: T;
+interface AnyAction<T = any> {
+  type: T;
+  // Allows any extra properties to be defined in an action.
+  [extraProps: string]: any;
 }
 
-export type ItemT<T> = T & { id: string };
+export interface AnyItem {
+  id: string;
+  // Allows any extra properties to be defined in an action.
+  [extraProps: string]: any;
+}
 
 export type ItemsT<T> = Partial<T> | Array<Partial<T>>;
 
-export type ID = string;
+export interface IAction<T> extends AnyAction {
+  items: ItemsT<T>;
+  meta: { [key: string]: any };
+}
 
-export type ConstantsT<C> = {
+export interface Constants {
   CREATE: string;
   REPLACE: string;
   UPDATE: string;
   DELETE: string;
   RESET: string;
   SET_META: string;
-} & C;
-
-export interface IAction<T> {
-  type: string;
-  items: ItemsT<T>;
-  meta: MappedT;
 }
 
-export interface IState {
+export interface State<Item> {
+  items: { [key: string]: Item };
   [key: string]: any;
 }
 
-export const generateId = (): string => {
+/**
+ * Constants
+ */
+const RESET_ALL = 'RESET_ALL_BRANCHES';
+
+/**
+ * Utils
+ */
+const makeType = (prefix: string, suffix?: string) =>
+  `${prefix}${suffix ? '/' + suffix : ''}`;
+
+const ensureArray = <T>(items: T): T[] =>
+  Array.isArray(items) ? items : [items];
+
+const generateId = (): string => {
   return ([1e7].toString() + -1e3 + -4e3 + -8e3 + -1e11).replace(
     /[018]/g,
     (c: any) =>
@@ -44,25 +56,34 @@ export const generateId = (): string => {
   );
 };
 
-export class Selectors<ItemType, BranchType> {
+/**
+ * Action Creators
+ */
+
+/** An action creator to reset all branches */
+export const resetAllBranches = (): AnyAction => ({
+  type: RESET_ALL
+});
+
+/**
+ * Selectors
+ */
+export class Selectors<ItemT, BranchType> {
   protected name: string;
 
   constructor(name: string) {
     this.name = name;
   }
 
-  byId<StateT>(state: StateT, id?: ID): ItemType | undefined {
-    return state[this.name].items[id || ""];
+  byId<StateT>(state: StateT, id?: string): ItemT | undefined {
+    return state[this.name].items[id || ''];
   }
 
-  all<StateT>(state: StateT): ItemType[] {
+  all<StateT>(state: StateT): ItemT[] {
     return Object.values(state[this.name].items);
   }
 
-  where<StateT>(
-    state: StateT,
-    condition: (item: ItemT<ItemType>) => boolean
-  ): ItemType[] {
+  where<StateT>(state: StateT, condition: (item: ItemT) => boolean): ItemT[] {
     return this.all(state).filter(condition);
   }
 
@@ -71,37 +92,41 @@ export class Selectors<ItemType, BranchType> {
   }
 }
 
-export class Actions<T> {
-  protected constant: ConstantsT<any>;
+export class Actions<
+  ItemT extends AnyItem,
+  BranchStateT extends State<ItemT> = State<ItemT>
+> {
+  protected constant: Constants;
   protected defaultItem: any;
 
-  constructor(constants: ConstantsT<any>, defaultItem: any) {
+  constructor(constants: Constants, defaultItem: ItemT) {
     this.constant = constants;
     this.defaultItem = defaultItem;
   }
 
-  replace(items: ItemsT<T>, devToolsSuffix?: string) {
+  replace(items: ItemsT<ItemT>, devToolsSuffix?: string) {
     return {
       type: makeType(this.constant.REPLACE, devToolsSuffix),
       items: ensureArray(items)
     };
   }
 
-  delete(items: ItemsT<T> | ID | ID[], devToolsSuffix?: string) {
+  delete(items: ItemsT<ItemT> | string | string[], devToolsSuffix?: string) {
     const wrappedItems = !Array.isArray(items) ? [items] : items;
 
     return {
       type: makeType(this.constant.DELETE, devToolsSuffix),
       items: ensureArray(
-        typeof wrappedItems[0] === "string"
+        typeof wrappedItems[0] === 'string'
           ? (wrappedItems as string[]).map((id: string) => ({ id }))
           : wrappedItems
       )
     };
   }
 
-  create(items?: ItemsT<T>, devToolsSuffix?: string) {
-    const newCreateItems = ensureArray(items || {}).map((item: ItemT<T>) => {
+  create(items?: ItemsT<ItemT>, devToolsSuffix?: string) {
+    const ensureItem = (items || {}) as ItemT;
+    const newCreateItems = ensureArray<ItemT>(ensureItem).map((item: ItemT) => {
       if (item.id === undefined) {
         item.id = generateId();
       }
@@ -118,14 +143,14 @@ export class Actions<T> {
     };
   }
 
-  update(items: ItemsT<T>, devToolsSuffix?: string) {
+  update(items: ItemsT<ItemT>, devToolsSuffix?: string) {
     return {
       type: makeType(this.constant.UPDATE, devToolsSuffix),
       items: ensureArray(items)
     };
   }
 
-  setMeta(meta: MappedT, devToolsSuffix?: string) {
+  setMeta(meta: Partial<BranchStateT>, devToolsSuffix?: string) {
     return {
       type: makeType(this.constant.SET_META, devToolsSuffix),
       meta
@@ -139,47 +164,25 @@ export class Actions<T> {
   }
 }
 
-interface IStateBranchOpts<
-  BranchStateType,
-  ItemType,
-  ActionsType = Actions<ItemType>,
-  SelectorsType = Selectors<ItemType, BranchStateType>,
-  ConstantsType = {},
-  UtilsType = {}
-> {
-  name: string;
-  actions?: new (
-    constants: ConstantsT<ConstantsType>,
-    defaultItem: MappedT
-  ) => ActionsType;
-  selectors?: new (name: string) => SelectorsType;
-  constants?: ConstantsType;
-  utils?: UtilsType;
-  defaultItem?: MappedT;
-  defaultState?: MappedT;
-  reducer?: (state: IState, action: IAction<ItemType>) => IState;
-}
-
 export class StateBranch<
-  ItemType,
-  BranchStateType,
-  ActionsType = Actions<ItemType>,
-  SelectorsType = Selectors<ItemType, BranchStateType>,
-  ConstantsType = {},
-  UtilsType = {}
+  ItemT extends AnyItem,
+  BranchStateT extends State<ItemT> = State<ItemT>,
+  ActionsT extends Actions<ItemT, BranchStateT> = Actions<ItemT, BranchStateT>,
+  SelectorsT extends Selectors<ItemT, BranchStateT> = Selectors<
+    ItemT,
+    BranchStateT
+  >,
+  ConstantsT extends { [key: string]: string } = { [key: string]: string },
+  UtilsT extends { [key: string]: any } = { [key: string]: any }
 > {
   name: string;
-
-  constant: ConstantsT<ConstantsType>;
-  util: UtilsType;
-  action: ActionsType;
-  select: SelectorsType;
-  defaultItem: MappedT;
-  defaultState: MappedT;
-  protected extendedReducer: (
-    state: IState,
-    action: IAction<ItemType>
-  ) => IState;
+  constant: ConstantsT & Constants;
+  util: UtilsT;
+  action: ActionsT;
+  select: SelectorsT;
+  defaultItem: ItemT;
+  defaultState: BranchStateT;
+  protected extendedReducer;
 
   constructor({
     name,
@@ -189,23 +192,25 @@ export class StateBranch<
     selectors: SelectorsConstructor = Selectors,
     // @ts-ignore
     constants = {},
-    utils,
+    // @ts-ignore
+    utils = {},
+    // @ts-ignore
     defaultItem = {},
-    defaultState = { items: {} },
+    defaultState = { items: {} } as BranchStateT,
     reducer = (state, action) => state
-  }: IStateBranchOpts<
-    BranchStateType,
-    ItemType,
-    ActionsType,
-    SelectorsType,
-    ConstantsType,
-    UtilsType
-  >) {
+  }: {
+    name: string;
+    actions?: new (constants: Constants, defaultItem: ItemT) => ActionsT;
+    selectors?: new (name: string) => SelectorsT;
+    constants?: ConstantsT;
+    utils?: UtilsT;
+    defaultItem?: ItemT;
+    defaultState?: BranchStateT;
+    reducer?: (state: State<ItemT>, action: IAction<ItemT>) => State<ItemT>;
+  }) {
     this.name = name;
 
-    this.constant = {
-      // @ts-ignore
-      ...constants,
+    const defaultConstants: Constants = {
       CREATE: `${name}/CREATE`,
       REPLACE: `${name}/REPLACE`,
       UPDATE: `${name}/UPDATE`,
@@ -213,9 +218,13 @@ export class StateBranch<
       SET_META: `${name}/SET_META`,
       RESET: `${name}/RESET`
     };
-    // @ts-ignore
-    this.util = utils;
 
+    this.constant = {
+      ...constants,
+      ...defaultConstants
+    };
+
+    this.util = utils;
     this.defaultItem = defaultItem;
     this.reducer = this.reducer.bind(this);
     this.defaultState = defaultState;
@@ -224,13 +233,17 @@ export class StateBranch<
     this.select = new SelectorsConstructor(this.name);
   }
 
-  reducer(state: IState = this.defaultState, action: IAction<ItemType>) {
+  reducer(
+    state: BranchStateT = this.defaultState,
+    _action: AnyAction
+  ): BranchStateT {
+    const action = _action as IAction<ItemT>;
     const items = ensureArray(action.items);
-    const type = action.type.split("/", 2).join("/");
+    const type = action.type.split('/', 2).join('/');
 
     switch (type) {
       case this.constant.CREATE:
-        const newCreateItems = items.reduce((acc, item: ItemT<ItemType>) => {
+        const newCreateItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
             ...(item as any)
@@ -246,7 +259,7 @@ export class StateBranch<
           }
         };
       case this.constant.UPDATE:
-        const newUpdateItems = items.reduce((acc, item: ItemT<ItemType>) => {
+        const newUpdateItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
             ...(item as any)
@@ -262,7 +275,7 @@ export class StateBranch<
           }
         };
       case this.constant.REPLACE:
-        const newReplaceItems = items.reduce((acc, item: ItemT<ItemType>) => {
+        const newReplaceItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = item;
           return acc;
         }, {});
@@ -276,7 +289,7 @@ export class StateBranch<
         };
       case this.constant.DELETE:
         const newDeleteItems = items.reduce(
-          (acc, item: ItemT<ItemType>) => {
+          (acc, item: ItemT) => {
             delete acc[item.id];
             return acc;
           },
@@ -293,6 +306,7 @@ export class StateBranch<
           ...action.meta
         };
       case this.constant.RESET:
+      case RESET_ALL:
         return this.defaultState;
       default:
         return this.extendedReducer(state, action);
