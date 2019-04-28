@@ -218,7 +218,7 @@ export class StateBranch<
     selectors?: new (name: string) => SelectorsT;
     constants?: ConstantsT;
     utils?: UtilsT;
-    defaultItem?: ItemT;
+    defaultItem?: Partial<ItemT>;
     defaultState?: BranchStateT;
     reducer?: (state: State<ItemT>, action: IAction<ItemT>) => State<ItemT>;
     generateId?: () => string;
