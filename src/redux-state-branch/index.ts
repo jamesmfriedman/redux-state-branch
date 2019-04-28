@@ -12,9 +12,9 @@ export interface AnyItem {
 
 export type ItemsT<T> = Partial<T> | Array<Partial<T>>;
 
-export interface IAction<T> extends AnyAction {
-  items: ItemsT<T>;
-  meta: { [key: string]: any };
+export interface StateBranchAction<ItemT, BranchStateT> extends AnyAction {
+  items: { [key: string]: ItemT };
+  meta: BranchStateT;
 }
 
 export interface Constants {
@@ -220,7 +220,7 @@ export class StateBranch<
     utils?: UtilsT;
     defaultItem?: Partial<ItemT>;
     defaultState?: BranchStateT;
-    reducer?: (state: BranchStateT, action: IAction<ItemT>) => BranchStateT;
+    reducer?: (state: BranchStateT, action: any) => BranchStateT;
     generateId?: () => string;
   }) {
     this.name = name;
@@ -256,7 +256,7 @@ export class StateBranch<
     state: BranchStateT = this.defaultState,
     _action: AnyAction
   ): BranchStateT {
-    const action = _action as IAction<ItemT>;
+    const action = _action as StateBranchAction<ItemT, BranchStateT>;
     const items = ensureArray(action.items);
     const type = action.type.split('/', 2).join('/');
 
