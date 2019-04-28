@@ -220,7 +220,7 @@ export class StateBranch<
     utils?: UtilsT;
     defaultItem?: Partial<ItemT>;
     defaultState?: BranchStateT;
-    reducer?: (state: State<ItemT>, action: IAction<ItemT>) => State<ItemT>;
+    reducer?: (state: BranchStateT, action: IAction<ItemT>) => BranchStateT;
     generateId?: () => string;
   }) {
     this.name = name;
