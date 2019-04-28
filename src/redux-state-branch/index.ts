@@ -100,12 +100,12 @@ export class Actions<
   BranchStateT extends State<ItemT> = State<ItemT>
 > {
   protected constant: Constants;
-  protected defaultItem: ItemT;
+  protected defaultItem: Partial<ItemT>;
   protected generateId: () => string;
 
   constructor(
     constants: Constants,
-    defaultItem: ItemT,
+    defaultItem: Partial<ItemT>,
     generateId: () => string
   ) {
     this.constant = constants;
@@ -189,7 +189,7 @@ export class StateBranch<
   util: UtilsT;
   action: ActionsT;
   select: SelectorsT;
-  defaultItem: ItemT;
+  defaultItem: Partial<ItemT>;
   defaultState: BranchStateT;
   protected extendedReducer;
 
@@ -212,7 +212,7 @@ export class StateBranch<
     name: string;
     actions?: new (
       constants: Constants,
-      defaultItem: ItemT,
+      defaultItem: Partial<ItemT>,
       generateId: () => string
     ) => ActionsT;
     selectors?: new (name: string) => SelectorsT;
