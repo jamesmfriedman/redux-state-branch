@@ -78,7 +78,7 @@ export class Selectors<
     this.name = name;
   }
 
-  byId<StateT>(state: StateT, id?: string): ItemT | undefined {
+  byId<StateT>(state: StateT, id?: string | null): ItemT | undefined {
     return state[this.name].items[id || ''];
   }
 
