@@ -38,6 +38,6 @@
     "react-router-dom": "^4.3.1",
     "react-scripts-ts": "2.17.0",
     "rmwc": "^1.9.2",
-    "typescript": "^3.0.1"
+    "typescript": "^3.4.5"
   }
 }
