@@ -27,7 +27,7 @@ Object.defineProperty(window, 'crypto', {
   }
 });
 
-const branch = new StateBranch({
+const branch = new StateBranch<UserT, BranchStateT>({
   name: PREFIX,
   constants: {
     CUSTOM: 'CUSTOM_CONSTANT'
@@ -71,8 +71,8 @@ describe('Constants', () => {
     expect(branch.constant.UPDATE).toBe(`${PREFIX}/UPDATE`);
   });
 
-  it('DELETE', () => {
-    expect(branch.constant.DELETE).toBe(`${PREFIX}/DELETE`);
+  it('REMOVE', () => {
+    expect(branch.constant.REMOVE).toBe(`${PREFIX}/REMOVE`);
   });
 
   it('RESET', () => {
@@ -129,16 +129,16 @@ describe('Actions', () => {
     expect(state.items.testUser).toEqual(item);
   });
 
-  it('delete by item', () => {
-    const action = branch.action.delete({
+  it('remove by item', () => {
+    const action = branch.action.remove({
       id: 'testUser'
     });
     const state = branch.reducer(undefined, action);
     expect(state.items.testUser).toBeUndefined();
   });
 
-  it('delete by id', () => {
-    const action = branch.action.delete('testUser');
+  it('remove by id', () => {
+    const action = branch.action.remove('testUser');
     const state = branch.reducer(undefined, action);
     expect(state.items.testUser).toBeUndefined();
   });
