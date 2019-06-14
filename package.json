@@ -1,6 +1,6 @@
 {
   "name": "redux-state-branch",
-  "version": "0.0.37",
+  "version": "0.0.38",
   "private": false,
   "description": "A redux wrapper for sane people.",
   "homepage": "https://jamesmfriedman.github.io/redux-state-branch/",
