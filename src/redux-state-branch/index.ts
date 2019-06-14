@@ -82,16 +82,20 @@ export const selectorsFactory = <
   };
 
   return {
+    /** Get all items */
     all,
+    /** Get an item by id */
     byId: <StateT>(state: StateT, id?: string | null): ItemT | undefined => {
       return state[branchName].items[id || ''];
     },
+    /** Get items that meet a filter condition */
     where: <StateT>(
       state: StateT,
       condition: (item: ItemT) => boolean
     ): ItemT[] => {
       return all(state).filter(condition);
     },
+    /** Get the top level meta content  */
     meta: <StateT>(state: StateT): BranchStateT => {
       return state[branchName];
     }
@@ -103,12 +107,16 @@ export class Selectors<
   BranchStateT extends State<ItemT> = State<ItemT>
 > {
   protected branchName: string;
+  /** Get all items */
   all: <StateT>(state: StateT) => ItemT[];
+  /** Get an item by id */
   byId: <StateT>(state: StateT, id?: string | null) => ItemT | undefined;
+  /** Get an items that meet a filter condition */
   where: <StateT>(
     state: StateT,
     condition: (item: ItemT) => boolean
   ) => ItemT[];
+  /** Get the top level meta content  */
   meta: <StateT>(state: StateT) => BranchStateT;
 
   constructor(branchName: string) {
@@ -143,7 +151,7 @@ export const actionsFactory = <
   const constant = constantsFactory(branchName);
   return {
     /** Create an item */
-    create: (items?: ItemsT<ItemT>, devToolsSuffix?: string) => {
+    create: (items?: ItemsT<ItemT>, typeSuffix?: string) => {
       const ensureItem = (items || {}) as ItemT;
       const newCreateItems = ensureArray<ItemT>(ensureItem).map(
         (item: ItemT) => {
@@ -158,26 +166,23 @@ export const actionsFactory = <
       );
 
       return {
-        type: makeType(constant.CREATE, devToolsSuffix),
+        type: makeType(constant.CREATE, typeSuffix),
         items: ensureArray<ItemT>(newCreateItems)
       };
     },
     /** Update an item */
-    update: (items: ItemsT<ItemT>, devToolsSuffix?: string) => {
+    update: (items: ItemsT<ItemT>, typeSuffix?: string) => {
       return {
-        type: makeType(constant.UPDATE, devToolsSuffix),
+        type: makeType(constant.UPDATE, typeSuffix),
         items: ensureArray<ItemT>(items)
       };
     },
     /** Remove an item */
-    remove: (
-      items: ItemsT<ItemT> | string | string[],
-      devToolsSuffix?: string
-    ) => {
+    remove: (items: ItemsT<ItemT> | string | string[], typeSuffix?: string) => {
       const wrappedItems = !Array.isArray(items) ? [items] : items;
 
       return {
-        type: makeType(constant.REMOVE, devToolsSuffix),
+        type: makeType(constant.REMOVE, typeSuffix),
         items: ensureArray<ItemT>(
           typeof wrappedItems[0] === 'string'
             ? (wrappedItems as string[]).map((id: string) => ({ id }))
@@ -186,22 +191,22 @@ export const actionsFactory = <
       };
     },
     /** Replace an item */
-    replace: (items: ItemsT<ItemT>, devToolsSuffix?: string) => {
+    replace: (items: ItemsT<ItemT>, typeSuffix?: string) => {
       return {
-        type: makeType(constant.REPLACE, devToolsSuffix),
+        type: makeType(constant.REPLACE, typeSuffix),
         items: ensureArray<ItemT>(items)
       };
     },
     /** Set meta content */
-    setMeta: (meta: Partial<BranchStateT>, devToolsSuffix?: string) => {
+    setMeta: (meta: Partial<BranchStateT>, typeSuffix?: string) => {
       return {
-        type: makeType(constant.SET_META, devToolsSuffix),
+        type: makeType(constant.SET_META, typeSuffix),
         meta
       };
     },
     /** Reset branch to initial state */
-    reset: (devToolsSuffix?: string) => ({
-      type: makeType(constant.RESET, devToolsSuffix)
+    reset: (typeSuffix?: string) => ({
+      type: makeType(constant.RESET, typeSuffix)
     })
   };
 };
@@ -221,7 +226,7 @@ export class Actions<
   /** Create an item */
   create: (
     items?: Partial<ItemT> | Partial<ItemT>[] | undefined,
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
     items: PartialWithId<ItemT>[];
@@ -229,7 +234,7 @@ export class Actions<
   /** Update an item */
   update: (
     items: ItemsT<ItemT>,
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
     items: PartialWithId<ItemT>[];
@@ -237,7 +242,7 @@ export class Actions<
   /** Remove an item */
   remove: (
     items: string | Partial<ItemT> | Partial<ItemT>[] | string[],
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
     items: PartialWithId<ItemT>[];
@@ -245,7 +250,7 @@ export class Actions<
   /** DEPRECATED, Use remove instead */
   delete: (
     items: string | Partial<ItemT> | Partial<ItemT>[] | string[],
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
     items: PartialWithId<ItemT>[];
@@ -253,7 +258,7 @@ export class Actions<
   /** Replace an item */
   replace: (
     items: ItemsT<ItemT>,
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
     items: PartialWithId<ItemT>[];
@@ -261,14 +266,14 @@ export class Actions<
   /** Set meta content */
   setMeta: (
     meta: Partial<BranchStateT>,
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
     meta: Partial<BranchStateT>;
   };
   /** Reset branch to initial state */
   reset: (
-    devToolsSuffix?: string | undefined
+    typeSuffix?: string | undefined
   ) => {
     type: string;
   };
@@ -293,12 +298,12 @@ export class Actions<
     this.update = update;
     this.delete = (
       items: ItemsT<ItemT> | string | string[],
-      devToolsSuffix?: string
+      typeSuffix?: string
     ) => {
       console.log(
         `${branchName}.action.delete is deprecated. Please use .remove instead.`
       );
-      return remove(items, devToolsSuffix);
+      return remove(items, typeSuffix);
     };
     this.remove = remove;
     this.replace = replace;
@@ -306,14 +311,15 @@ export class Actions<
     this.reset = reset;
   }
 }
-type ActionsMap = { [key: string]: (...args: any) => AnyAction };
-type SelectorsMap = { [key: string]: (...args: any) => any };
-
 export class StateBranch<
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT>,
-  ActionsT extends Actions<ItemT, BranchStateT> | ActionsMap,
-  SelectorsT extends Selectors<ItemT, BranchStateT> | SelectorsMap,
+  ActionsT extends
+    | Actions<ItemT, BranchStateT>
+    | { [key: string]: (...args: any) => AnyAction },
+  SelectorsT extends
+    | Selectors<ItemT, BranchStateT>
+    | { [key: string]: (...args: any) => any },
   ConstantsT extends { [key: string]: string },
   UtilsT extends { [key: string]: any }
 > {
@@ -328,15 +334,11 @@ export class StateBranch<
 
   constructor({
     name,
-    // @ts-ignore
-    actions: ActionsConstructor = Actions,
-    // @ts-ignore
-    selectors: SelectorsConstructor = Selectors,
-    // @ts-ignore
-    constants = {},
-    // @ts-ignore
-    utils = {},
-    // @ts-ignore
+
+    actions: ActionsConstructor = (Actions as unknown) as ActionsT,
+    selectors: SelectorsConstructor = (Selectors as unknown) as SelectorsT,
+    constants = {} as ConstantsT,
+    utils = {} as UtilsT,
     defaultItem = {},
     defaultState = { items: {} } as BranchStateT,
     reducer = (state, action) => state,
