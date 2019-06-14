@@ -137,11 +137,12 @@ export const actionsFactory = <
   BranchStateT extends State<ItemT> = State<ItemT>
 >(
   branchName: string,
-  defaultItem: Partial<ItemT>,
+  defaultItem: Partial<ItemT> = {},
   generateIdFunc: () => string = generateId
 ) => {
   const constant = constantsFactory(branchName);
   return {
+    /** Create an item */
     create: (items?: ItemsT<ItemT>, devToolsSuffix?: string) => {
       const ensureItem = (items || {}) as ItemT;
       const newCreateItems = ensureArray<ItemT>(ensureItem).map(
@@ -161,12 +162,14 @@ export const actionsFactory = <
         items: ensureArray<ItemT>(newCreateItems)
       };
     },
+    /** Update an item */
     update: (items: ItemsT<ItemT>, devToolsSuffix?: string) => {
       return {
         type: makeType(constant.UPDATE, devToolsSuffix),
         items: ensureArray<ItemT>(items)
       };
     },
+    /** Remove an item */
     remove: (
       items: ItemsT<ItemT> | string | string[],
       devToolsSuffix?: string
@@ -182,18 +185,21 @@ export const actionsFactory = <
         )
       };
     },
+    /** Replace an item */
     replace: (items: ItemsT<ItemT>, devToolsSuffix?: string) => {
       return {
         type: makeType(constant.REPLACE, devToolsSuffix),
         items: ensureArray<ItemT>(items)
       };
     },
+    /** Set meta content */
     setMeta: (meta: Partial<BranchStateT>, devToolsSuffix?: string) => {
       return {
         type: makeType(constant.SET_META, devToolsSuffix),
         meta
       };
     },
+    /** Reset branch to initial state */
     reset: (devToolsSuffix?: string) => ({
       type: makeType(constant.RESET, devToolsSuffix)
     })
@@ -236,7 +242,7 @@ export class Actions<
     type: string;
     items: PartialWithId<ItemT>[];
   };
-  /** Delete an item */
+  /** DEPRECATED, Use remove instead */
   delete: (
     items: string | Partial<ItemT> | Partial<ItemT>[] | string[],
     devToolsSuffix?: string | undefined
@@ -260,7 +266,7 @@ export class Actions<
     type: string;
     meta: Partial<BranchStateT>;
   };
-  /** Reset to initial state */
+  /** Reset branch to initial state */
   reset: (
     devToolsSuffix?: string | undefined
   ) => {
@@ -300,17 +306,16 @@ export class Actions<
     this.reset = reset;
   }
 }
+type ActionsMap = { [key: string]: (...args: any) => AnyAction };
+type SelectorsMap = { [key: string]: (...args: any) => any };
 
 export class StateBranch<
   ItemT extends AnyItem,
-  BranchStateT extends State<ItemT> = State<ItemT>,
-  ActionsT extends Actions<ItemT, BranchStateT> = Actions<ItemT, BranchStateT>,
-  SelectorsT extends Selectors<ItemT, BranchStateT> = Selectors<
-    ItemT,
-    BranchStateT
-  >,
-  ConstantsT extends { [key: string]: string } = { [key: string]: string },
-  UtilsT extends { [key: string]: any } = { [key: string]: any }
+  BranchStateT extends State<ItemT>,
+  ActionsT extends Actions<ItemT, BranchStateT> | ActionsMap,
+  SelectorsT extends Selectors<ItemT, BranchStateT> | SelectorsMap,
+  ConstantsT extends { [key: string]: string },
+  UtilsT extends { [key: string]: any }
 > {
   name: string;
   constant: ConstantsT & Constants;
@@ -338,13 +343,8 @@ export class StateBranch<
     generateId: customGenerateIdFunc = generateId
   }: {
     name: string;
-    actions?: new (
-      branchName: string,
-      constants: Constants,
-      defaultItem: Partial<ItemT>,
-      generateId: () => string
-    ) => ActionsT;
-    selectors?: new (name: string) => SelectorsT;
+    actions?: ActionsT | (new (...args: any) => ActionsT);
+    selectors?: SelectorsT | (new (name: string) => SelectorsT);
     constants?: ConstantsT;
     utils?: UtilsT;
     defaultItem?: Partial<ItemT>;
@@ -366,13 +366,19 @@ export class StateBranch<
     this.reducer = this.reducer.bind(this);
     this.defaultState = defaultState;
     this.extendedReducer = reducer;
-    this.action = new ActionsConstructor(
-      this.name,
-      this.constant,
-      this.defaultItem,
-      customGenerateIdFunc
-    );
-    this.select = new SelectorsConstructor(this.name);
+    this.action =
+      typeof ActionsConstructor === 'function'
+        ? new ActionsConstructor(
+            this.name,
+            this.constant,
+            this.defaultItem,
+            customGenerateIdFunc
+          )
+        : ActionsConstructor;
+    this.select =
+      typeof SelectorsConstructor === 'function'
+        ? new SelectorsConstructor(this.name)
+        : SelectorsConstructor;
   }
 
   reducer(
@@ -380,7 +386,7 @@ export class StateBranch<
     _action: AnyAction
   ): BranchStateT {
     const action = _action as StateBranchAction<ItemT, BranchStateT>;
-    const items = ensureArray(action.items);
+    const items = ensureArray<ItemT>(action.items);
     const type = action.type.split('/', 2).join('/');
 
     switch (type) {

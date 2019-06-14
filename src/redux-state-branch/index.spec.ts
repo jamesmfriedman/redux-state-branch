@@ -1,4 +1,11 @@
-import { StateBranch, resetAllBranches, Actions, Selectors } from '.';
+import {
+  StateBranch,
+  resetAllBranches,
+  Actions,
+  Selectors,
+  actionsFactory,
+  selectorsFactory
+} from '.';
 
 type UserT = {
   id: string;
@@ -27,7 +34,7 @@ Object.defineProperty(window, 'crypto', {
   }
 });
 
-const branch = new StateBranch<UserT, BranchStateT>({
+const branch = new StateBranch({
   name: PREFIX,
   constants: {
     CUSTOM: 'CUSTOM_CONSTANT'
@@ -47,7 +54,7 @@ describe('StateBranch', () => {
 });
 
 describe('ID Generation', () => {
-  const customIdBranch = new StateBranch<{ id: string }>({
+  const customIdBranch = new StateBranch({
     name: PREFIX,
     generateId: () => 'custom-id'
   });
