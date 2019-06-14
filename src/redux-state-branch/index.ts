@@ -116,19 +116,20 @@ export class Selectors<
 
   /** Get all items */
   all<StateT>(state: StateT) {
-    return this.methods.all(state);
+    return this.methods.all(state) as ItemT[];
   }
   /** Get an item by id */
   byId<StateT>(state: StateT, id?: string | null) {
-    return this.methods.byId<StateT>(state, id);
+    return this.methods.byId(state, id) as (ItemT | undefined);
   }
   /** Get an items that meet a filter condition */
   where<StateT>(state: StateT, condition: (item: ItemT) => boolean) {
-    return this.methods.where(state, condition);
+    return this.methods.where(state, condition) as ItemT[];
   }
   /** Get the top level meta content  */
   meta<StateT>(state: StateT) {
-    return this.methods.meta(state);
+    // bug: cant cast this output as BranchStateT
+    return this.methods.meta<StateT>(state);
   }
 }
 
@@ -212,6 +213,11 @@ export const actionsFactory = <
   };
 };
 
+type ActionClassReturn<ItemT> = {
+  type: string;
+  items: PartialWithId<ItemT>[];
+};
+
 export class Actions<
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT> = State<ItemT>
@@ -242,11 +248,11 @@ export class Actions<
 
   /** Create an item */
   create(items?: ItemsT<ItemT> | undefined, typeSuffix?: string | undefined) {
-    return this.methods.create(items, typeSuffix);
+    return this.methods.create(items, typeSuffix) as ActionClassReturn<ItemT>;
   }
   /** Update an item */
   update(items: ItemsT<ItemT>, typeSuffix?: string | undefined) {
-    return this.methods.update(items, typeSuffix);
+    return this.methods.update(items, typeSuffix) as ActionClassReturn<ItemT>;
   }
 
   /** Remove an item */
@@ -254,7 +260,7 @@ export class Actions<
     items: string | ItemsT<ItemT> | string[],
     typeSuffix?: string | undefined
   ) {
-    return this.methods.remove(items, typeSuffix);
+    return this.methods.remove(items, typeSuffix) as ActionClassReturn<ItemT>;
   }
 
   /** DEPRECATED, Use remove instead */
@@ -262,17 +268,20 @@ export class Actions<
     items: string | ItemsT<ItemT> | string[],
     typeSuffix?: string | undefined
   ) {
-    return this.methods.remove(items, typeSuffix);
+    return this.methods.remove(items, typeSuffix) as ActionClassReturn<ItemT>;
   }
 
   /** Replace an item */
   replace(items: ItemsT<ItemT>, typeSuffix?: string | undefined) {
-    return this.methods.replace(items, typeSuffix);
+    return this.methods.replace(items, typeSuffix) as ActionClassReturn<ItemT>;
   }
 
   /** Set meta content */
   setMeta(meta: Partial<BranchStateT>, typeSuffix?: string | undefined) {
-    return this.methods.setMeta(meta, typeSuffix);
+    return this.methods.setMeta(meta, typeSuffix) as {
+      type: string;
+      meta: Partial<BranchStateT>;
+    };
   }
 
   /** Reset branch to initial state */
