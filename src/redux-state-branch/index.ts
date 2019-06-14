@@ -106,28 +106,29 @@ export class Selectors<
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT> = State<ItemT>
 > {
+  private methods: ReturnType<typeof selectorsFactory>;
   protected branchName: string;
-  /** Get all items */
-  all: <StateT>(state: StateT) => ItemT[];
-  /** Get an item by id */
-  byId: <StateT>(state: StateT, id?: string | null) => ItemT | undefined;
-  /** Get an items that meet a filter condition */
-  where: <StateT>(
-    state: StateT,
-    condition: (item: ItemT) => boolean
-  ) => ItemT[];
-  /** Get the top level meta content  */
-  meta: <StateT>(state: StateT) => BranchStateT;
 
   constructor(branchName: string) {
     this.branchName = branchName;
-    const { all, byId, where, meta } = selectorsFactory<ItemT, BranchStateT>(
-      branchName
-    );
-    this.all = all;
-    this.byId = byId;
-    this.where = where;
-    this.meta = meta;
+    this.methods = selectorsFactory<ItemT, BranchStateT>(branchName);
+  }
+
+  /** Get all items */
+  all<StateT>(state: StateT) {
+    return this.methods.all(state);
+  }
+  /** Get an item by id */
+  byId<StateT>(state: StateT, id?: string | null) {
+    return this.methods.byId(state, id);
+  }
+  /** Get an items that meet a filter condition */
+  where<StateT>(state: StateT, condition: (item: ItemT) => boolean) {
+    return this.methods.where(state, condition);
+  }
+  /** Get the top level meta content  */
+  meta<StateT>(state: StateT) {
+    return this.methods.meta(state);
   }
 }
 
@@ -219,64 +220,7 @@ export class Actions<
   protected constant: Constants;
   protected defaultItem: Partial<ItemT>;
   protected generateId: () => string;
-
-  // Really annoying, had to recast the entire interface because you cant
-  // extract the return type of generics
-
-  /** Create an item */
-  create: (
-    items?: Partial<ItemT> | Partial<ItemT>[] | undefined,
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-    items: PartialWithId<ItemT>[];
-  };
-  /** Update an item */
-  update: (
-    items: ItemsT<ItemT>,
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-    items: PartialWithId<ItemT>[];
-  };
-  /** Remove an item */
-  remove: (
-    items: string | Partial<ItemT> | Partial<ItemT>[] | string[],
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-    items: PartialWithId<ItemT>[];
-  };
-  /** DEPRECATED, Use remove instead */
-  delete: (
-    items: string | Partial<ItemT> | Partial<ItemT>[] | string[],
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-    items: PartialWithId<ItemT>[];
-  };
-  /** Replace an item */
-  replace: (
-    items: ItemsT<ItemT>,
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-    items: PartialWithId<ItemT>[];
-  };
-  /** Set meta content */
-  setMeta: (
-    meta: Partial<BranchStateT>,
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-    meta: Partial<BranchStateT>;
-  };
-  /** Reset branch to initial state */
-  reset: (
-    typeSuffix?: string | undefined
-  ) => {
-    type: string;
-  };
+  private methods: ReturnType<typeof actionsFactory>;
 
   constructor(
     branchName: string,
@@ -289,28 +233,54 @@ export class Actions<
     this.defaultItem = defaultItem;
     this.generateId = generateId;
 
-    const { create, update, remove, replace, setMeta, reset } = actionsFactory<
-      ItemT,
-      BranchStateT
-    >(branchName, defaultItem, generateId);
+    this.methods = actionsFactory<ItemT, BranchStateT>(
+      branchName,
+      defaultItem,
+      generateId
+    );
+  }
 
-    this.create = create;
-    this.update = update;
-    this.delete = (
-      items: ItemsT<ItemT> | string | string[],
-      typeSuffix?: string
-    ) => {
-      console.log(
-        `${branchName}.action.delete is deprecated. Please use .remove instead.`
-      );
-      return remove(items, typeSuffix);
-    };
-    this.remove = remove;
-    this.replace = replace;
-    this.setMeta = setMeta;
-    this.reset = reset;
+  /** Create an item */
+  create(items?: ItemsT<ItemT> | undefined, typeSuffix?: string | undefined) {
+    return this.methods.create(items, typeSuffix);
+  }
+  /** Update an item */
+  update(items: ItemsT<ItemT>, typeSuffix?: string | undefined) {
+    return this.methods.update(items, typeSuffix);
+  }
+
+  /** Remove an item */
+  remove(
+    items: string | ItemsT<ItemT> | string[],
+    typeSuffix?: string | undefined
+  ) {
+    return this.methods.remove(items, typeSuffix);
+  }
+
+  /** DEPRECATED, Use remove instead */
+  delete(
+    items: string | ItemsT<ItemT> | string[],
+    typeSuffix?: string | undefined
+  ) {
+    return this.methods.remove(items, typeSuffix);
+  }
+
+  /** Replace an item */
+  replace(items: ItemsT<ItemT>, typeSuffix?: string | undefined) {
+    return this.methods.replace(items, typeSuffix);
+  }
+
+  /** Set meta content */
+  setMeta(meta: Partial<BranchStateT>, typeSuffix?: string | undefined) {
+    return this.methods.setMeta(meta, typeSuffix);
+  }
+
+  /** Reset branch to initial state */
+  reset(typeSuffix?: string | undefined) {
+    return this.methods.reset(typeSuffix);
   }
 }
+
 export class StateBranch<
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT>,
