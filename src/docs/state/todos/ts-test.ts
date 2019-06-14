@@ -1,9 +1,9 @@
-import { Actions, Selectors, StateBranch } from "../../../redux-state-branch";
+import { Actions, Selectors, StateBranch } from '../../../redux-state-branch';
 
 interface TodoT {
   id: string;
   text: string;
-  priority: "normal";
+  priority: 'normal';
   isDone: boolean;
 }
 
@@ -31,13 +31,13 @@ class TodosSelectors extends Selectors<TodoT, TodoStateT> {
   visibleTodos(state: StateT, viewByFilter) {
     return this.where(state, todo => {
       switch (viewByFilter) {
-        case "todo":
+        case 'todo':
           return !todo.isDone;
-        case "done":
+        case 'done':
           return todo.isDone;
-        case "low":
-        case "normal":
-        case "high":
+        case 'low':
+        case 'normal':
+        case 'high':
           return todo.priority === viewByFilter;
         default:
           return true;
@@ -46,61 +46,61 @@ class TodosSelectors extends Selectors<TodoT, TodoStateT> {
   }
 }
 
-class TodosActions extends Actions<TodoT> {
+class TodosActions extends Actions<TodoT, TodoStateT> {
   toggleDone(todoId, isDone) {
     // make sure we have a boolean
-    return this.update({ id: todoId, isDone: !!isDone }, "isDone");
+    return this.update({ id: todoId, isDone: !!isDone }, 'isDone');
   }
 
   updateText(todoId, text) {
     // capitalize the first letter
     text = text.charAt(0).toUpperCase() + text.slice(1);
-    return this.update({ id: todoId, text }, "text");
+    return this.update({ id: todoId, text }, 'text');
   }
 
   changePriority(todoId, priority) {
-    if (!["low", "normal", "high"].includes(priority)) {
-      throw new Error("Invalid Priority");
+    if (!['low', 'normal', 'high'].includes(priority)) {
+      throw new Error('Invalid Priority');
     }
-    return this.update({ id: todoId, priority }, "priority");
+    return this.update({ id: todoId, priority }, 'priority');
   }
 
   updateViewByFilter(viewByFilter) {
-    return this.setMeta({ viewByFilter }, "viewByFilter");
+    return this.setMeta({ viewByFilter }, 'viewByFilter');
   }
 
   // Handling an Async action
   createTodo() {
     // Using redux thunk we get access to dispatch
     return dispatch => {
-      dispatch(this.setMeta({ loading: true }, "loading"));
+      dispatch(this.setMeta({ loading: true }, 'loading'));
 
       // Fake an async call, IRL use fetch...
       dispatch(this.create());
-      dispatch(this.setMeta({ loading: false }, "loading"));
+      dispatch(this.setMeta({ loading: false }, 'loading'));
     };
   }
 }
 
 export const todosBranch = new StateBranch({
-  name: "todos",
+  name: 'todos',
   selectors: TodosSelectors,
   actions: TodosActions,
   defaultState: {
     loading: false,
-    viewByFilter: "all",
+    viewByFilter: 'all',
     items: {
-      "1": {
-        id: "1",
-        text: "",
-        priority: "normal",
+      '1': {
+        id: '1',
+        text: '',
+        priority: 'normal',
         isDone: false
       }
     }
-  },
+  } as TodoStateT,
   defaultItem: {
-    text: "",
-    priority: "normal",
+    text: '',
+    priority: 'normal',
     isDone: false
   }
 });
@@ -108,12 +108,12 @@ export const todosBranch = new StateBranch({
 const state = {
   todos: {
     loading: false,
-    viewByFilter: "all",
+    viewByFilter: 'all',
     items: {
-      "1": {
-        id: "1",
-        text: "",
-        priority: "normal",
+      '1': {
+        id: '1',
+        text: '',
+        priority: 'normal',
         isDone: false
       }
     }
@@ -121,7 +121,7 @@ const state = {
 };
 
 // @ts-ignore
-const a = todosBranch.select.byId(state, "1");
+const a = todosBranch.select.byId(state, '1');
 // @ts-ignore
 const b = todosBranch.select.all(state);
 // @ts-ignore

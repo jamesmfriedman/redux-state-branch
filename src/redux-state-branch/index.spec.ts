@@ -1,11 +1,4 @@
-import {
-  StateBranch,
-  resetAllBranches,
-  Actions,
-  Selectors,
-  actionsFactory,
-  selectorsFactory
-} from '.';
+import { StateBranch, resetAllBranches, Actions, Selectors } from '.';
 
 type UserT = {
   id: string;
