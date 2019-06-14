@@ -120,7 +120,7 @@ export class Selectors<
   }
   /** Get an item by id */
   byId<StateT>(state: StateT, id?: string | null) {
-    return this.methods.byId(state, id);
+    return this.methods.byId<StateT>(state, id);
   }
   /** Get an items that meet a filter condition */
   where<StateT>(state: StateT, condition: (item: ItemT) => boolean) {
@@ -281,15 +281,18 @@ export class Actions<
   }
 }
 
+type ActionsMap = { [key: string]: Function } & ReturnType<
+  typeof actionsFactory
+>;
+type SelectorsMap = { [key: string]: Function } & ReturnType<
+  typeof selectorsFactory
+>;
+
 export class StateBranch<
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT>,
-  ActionsT extends
-    | Actions<ItemT, BranchStateT>
-    | { [key: string]: (...args: any) => AnyAction },
-  SelectorsT extends
-    | Selectors<ItemT, BranchStateT>
-    | { [key: string]: (...args: any) => any },
+  ActionsT extends Actions<ItemT, BranchStateT> | ActionsMap,
+  SelectorsT extends Selectors<ItemT, BranchStateT> | SelectorsMap,
   ConstantsT extends { [key: string]: string },
   UtilsT extends { [key: string]: any }
 > {
@@ -304,9 +307,8 @@ export class StateBranch<
 
   constructor({
     name,
-
-    actions: ActionsConstructor = (Actions as unknown) as ActionsT,
-    selectors: SelectorsConstructor = (Selectors as unknown) as SelectorsT,
+    actions: ActionsArg = (Actions as unknown) as ActionsT,
+    selectors: SelectorsArg = (Selectors as unknown) as SelectorsT,
     constants = {} as ConstantsT,
     utils = {} as UtilsT,
     defaultItem = {},
@@ -316,7 +318,7 @@ export class StateBranch<
   }: {
     name: string;
     actions?: ActionsT | (new (...args: any) => ActionsT);
-    selectors?: SelectorsT | (new (name: string) => SelectorsT);
+    selectors?: SelectorsT | (new (...args: any) => SelectorsT);
     constants?: ConstantsT;
     utils?: UtilsT;
     defaultItem?: Partial<ItemT>;
@@ -339,18 +341,18 @@ export class StateBranch<
     this.defaultState = defaultState;
     this.extendedReducer = reducer;
     this.action =
-      typeof ActionsConstructor === 'function'
-        ? new ActionsConstructor(
+      typeof ActionsArg === 'function'
+        ? new ActionsArg(
             this.name,
             this.constant,
             this.defaultItem,
             customGenerateIdFunc
           )
-        : ActionsConstructor;
+        : ActionsArg;
     this.select =
-      typeof SelectorsConstructor === 'function'
-        ? new SelectorsConstructor(this.name)
-        : SelectorsConstructor;
+      typeof SelectorsArg === 'function'
+        ? new SelectorsArg(this.name)
+        : SelectorsArg;
   }
 
   reducer(
