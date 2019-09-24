@@ -47,7 +47,7 @@ const makeType = (prefix: string, suffix?: string) =>
 const ensureArray = <T>(items: any): PartialWithId<T>[] =>
   Array.isArray(items) ? items : [items];
 
-const generateId = (): string => {
+const defaultGenerateId = (): string => {
   return ([1e7].toString() + -1e3 + -4e3 + -8e3 + -1e11).replace(
     /[018]/g,
     (c: any) =>
@@ -58,7 +58,7 @@ const generateId = (): string => {
   );
 };
 
-const constantsFactory = (name: string): Constants => ({
+const constants = (name: string): Constants => ({
   CREATE: `${name}/CREATE`,
   REPLACE: `${name}/REPLACE`,
   UPDATE: `${name}/UPDATE`,
@@ -71,67 +71,62 @@ const constantsFactory = (name: string): Constants => ({
  * Selectors
  */
 
-export const selectorsFactory = <
+export const selectors = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT> = State<ItemT>
->(
-  branchName: string
-) => {
-  const all = <StateT>(state: StateT): ItemT[] => {
-    return Object.values(state[branchName].items);
+>({
+  name
+}: {
+  /* The name of  your branch */
+  name: string;
+}) => {
+  const all = <StateT>({
+    state
+  }: {
+    /** A global state object */
+    state: StateT;
+  }): ItemT[] => {
+    return Object.values(state[name].items);
   };
 
   return {
     /** Get all items */
     all,
     /** Get an item by id */
-    byId: <StateT>(state: StateT, id?: string | null): ItemT | undefined => {
-      return state[branchName].items[id || ''];
+    byId: <StateT>({
+      state,
+      id
+    }: {
+      /** A global state object */
+      state: StateT;
+      /** The ID of your item */
+      id?: string | null;
+    }): ItemT | undefined => {
+      return state[name].items[id || ''];
     },
     /** Get items that meet a filter condition */
-    where: <StateT>(
-      state: StateT,
-      condition: (item: ItemT) => boolean
-    ): ItemT[] => {
-      return all(state).filter(condition);
+    where: <StateT>({
+      state,
+      callback
+    }: {
+      /** A global state object */
+      state: StateT;
+      /** A callback to pass the filter function */
+      callback: (item: ItemT, index: number) => boolean;
+    }): ItemT[] => {
+      return all({ state }).filter(callback);
     },
     /** Get the top level meta content  */
-    meta: <StateT>(state: StateT): BranchStateT => {
-      return state[branchName];
+    meta: <StateT>({
+      state
+    }: {
+      /** A global state object */
+      state: StateT;
+    }): BranchStateT => {
+      return state[name];
     }
   };
 };
-
-export class Selectors<
-  ItemT extends AnyItem,
-  BranchStateT extends State<ItemT> = State<ItemT>
-> {
-  private methods: ReturnType<typeof selectorsFactory>;
-  protected branchName: string;
-
-  constructor(branchName: string) {
-    this.branchName = branchName;
-    this.methods = selectorsFactory<ItemT, BranchStateT>(branchName);
-  }
-
-  /** Get all items */
-  all<StateT>(state: StateT) {
-    return this.methods.all(state) as ItemT[];
-  }
-  /** Get an item by id */
-  byId<StateT>(state: StateT, id?: string | null) {
-    return this.methods.byId(state, id) as (ItemT | undefined);
-  }
-  /** Get an items that meet a filter condition */
-  where<StateT>(state: StateT, condition: (item: ItemT) => boolean) {
-    return this.methods.where(state, condition) as ItemT[];
-  }
-  /** Get the top level meta content  */
-  meta<StateT>(state: StateT) {
-    // bug: cant cast this output as BranchStateT
-    return this.methods.meta<StateT>(state);
-  }
-}
 
 /**
  * Action Creators
@@ -142,15 +137,22 @@ export const resetAllBranches = (): AnyAction => ({
   type: RESET_ALL
 });
 
-export const actionsFactory = <
+export const actions = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT> = State<ItemT>
->(
-  branchName: string,
-  defaultItem: Partial<ItemT> = {},
-  generateIdFunc: () => string = generateId
-) => {
-  const constant = constantsFactory(branchName);
+>({
+  name,
+  defaultItem = {},
+  generateId = defaultGenerateId
+}: {
+  /* The name of your branch  */
+  name: string;
+  /* A default item used when creating new items  */
+  defaultItem?: Partial<ItemT>;
+  /* A default item used when creating new items  */
+  generateId?: () => string;
+}) => {
+  const constant = constants(name);
   return {
     /** Create an item */
     create: (items?: ItemsT<ItemT>, typeSuffix?: string) => {
@@ -158,7 +160,7 @@ export const actionsFactory = <
       const newCreateItems = ensureArray<ItemT>(ensureItem).map(
         (item: ItemT) => {
           if (item.id === undefined) {
-            item.id = generateIdFunc();
+            item.id = generateId();
           }
           return {
             ...defaultItem,
@@ -213,167 +215,57 @@ export const actionsFactory = <
   };
 };
 
-type ActionClassReturn<ItemT> = {
-  type: string;
-  items: PartialWithId<ItemT>[];
-};
-
-export class Actions<
-  ItemT extends AnyItem,
-  BranchStateT extends State<ItemT> = State<ItemT>
-> {
-  protected branchName: string;
-  protected constant: Constants;
-  protected defaultItem: Partial<ItemT>;
-  protected generateId: () => string;
-  private methods: ReturnType<typeof actionsFactory>;
-
-  constructor(
-    branchName: string,
-    constants: Constants,
-    defaultItem: Partial<ItemT>,
-    generateId: () => string
-  ) {
-    this.branchName = name;
-    this.constant = constants;
-    this.defaultItem = defaultItem;
-    this.generateId = generateId;
-
-    this.methods = actionsFactory<ItemT, BranchStateT>(
-      branchName,
-      defaultItem,
-      generateId
-    );
-  }
-
-  /** Create an item */
-  create(items?: ItemsT<ItemT> | undefined, typeSuffix?: string | undefined) {
-    return this.methods.create(items, typeSuffix) as ActionClassReturn<ItemT>;
-  }
-  /** Update an item */
-  update(items: ItemsT<ItemT>, typeSuffix?: string | undefined) {
-    return this.methods.update(items, typeSuffix) as ActionClassReturn<ItemT>;
-  }
-
-  /** Remove an item */
-  remove(
-    items: string | ItemsT<ItemT> | string[],
-    typeSuffix?: string | undefined
-  ) {
-    return this.methods.remove(items, typeSuffix) as ActionClassReturn<ItemT>;
-  }
-
-  /** DEPRECATED, Use remove instead */
-  delete(
-    items: string | ItemsT<ItemT> | string[],
-    typeSuffix?: string | undefined
-  ) {
-    return this.methods.remove(items, typeSuffix) as ActionClassReturn<ItemT>;
-  }
-
-  /** Replace an item */
-  replace(items: ItemsT<ItemT>, typeSuffix?: string | undefined) {
-    return this.methods.replace(items, typeSuffix) as ActionClassReturn<ItemT>;
-  }
-
-  /** Set meta content */
-  setMeta(meta: Partial<BranchStateT>, typeSuffix?: string | undefined) {
-    return this.methods.setMeta(meta, typeSuffix) as {
-      type: string;
-      meta: Partial<BranchStateT>;
-    };
-  }
-
-  /** Reset branch to initial state */
-  reset(typeSuffix?: string | undefined) {
-    return this.methods.reset(typeSuffix);
-  }
-}
-
-type ActionsMap = { [key: string]: Function } & ReturnType<
-  typeof actionsFactory
->;
-type SelectorsMap = { [key: string]: Function } & ReturnType<
-  typeof selectorsFactory
->;
-
-export class StateBranch<
+export const stateBranch = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT>,
-  ActionsT extends Actions<ItemT, BranchStateT> | ActionsMap,
-  SelectorsT extends Selectors<ItemT, BranchStateT> | SelectorsMap,
+  ActionsT,
+  SelectorsT,
   ConstantsT extends { [key: string]: string },
   UtilsT extends { [key: string]: any }
-> {
+>({
+  name,
+  defaultItem = {},
+  generateId: customGenerateIdFunc = defaultGenerateId,
+  actions: customActions = {} as ActionsT,
+  selectors: customSelectors = {} as SelectorsT,
+  constants: customConstants = {} as ConstantsT,
+  utils = {} as UtilsT,
+  defaultState = { items: {} } as BranchStateT,
+  reducer: extendedReducer = (state, action) => state
+}: {
   name: string;
-  constant: ConstantsT & Constants;
-  util: UtilsT;
-  action: ActionsT;
-  select: SelectorsT;
-  defaultItem: Partial<ItemT>;
-  defaultState: BranchStateT;
-  protected extendedReducer;
+  actions?: ActionsT;
+  selectors?: SelectorsT;
+  constants?: ConstantsT;
+  utils?: UtilsT;
+  defaultItem?: Partial<ItemT>;
+  defaultState?: BranchStateT;
+  reducer?: (state: BranchStateT, action: any) => BranchStateT;
+  generateId?: () => string;
+}) => {
+  const constant = {
+    ...customConstants,
+    ...constants(name)
+  };
 
-  constructor({
+  const defaultActions = actions<ItemT, BranchStateT>({
     name,
-    actions: ActionsArg = (Actions as unknown) as ActionsT,
-    selectors: SelectorsArg = (Selectors as unknown) as SelectorsT,
-    constants = {} as ConstantsT,
-    utils = {} as UtilsT,
-    defaultItem = {},
-    defaultState = { items: {} } as BranchStateT,
-    reducer = (state, action) => state,
-    generateId: customGenerateIdFunc = generateId
-  }: {
-    name: string;
-    actions?: ActionsT | (new (...args: any) => ActionsT);
-    selectors?: SelectorsT | (new (...args: any) => SelectorsT);
-    constants?: ConstantsT;
-    utils?: UtilsT;
-    defaultItem?: Partial<ItemT>;
-    defaultState?: BranchStateT;
-    reducer?: (state: BranchStateT, action: any) => BranchStateT;
-    generateId?: () => string;
-  }) {
-    this.name = name;
+    defaultItem,
+    generateId: customGenerateIdFunc
+  });
 
-    const defaultConstants = constantsFactory(name);
+  const defaultSelectors = selectors<ItemT, BranchStateT>({ name });
 
-    this.constant = {
-      ...constants,
-      ...defaultConstants
-    };
-
-    this.util = utils;
-    this.defaultItem = defaultItem;
-    this.reducer = this.reducer.bind(this);
-    this.defaultState = defaultState;
-    this.extendedReducer = reducer;
-    this.action =
-      typeof ActionsArg === 'function'
-        ? new ActionsArg(
-            this.name,
-            this.constant,
-            this.defaultItem,
-            customGenerateIdFunc
-          )
-        : ActionsArg;
-    this.select =
-      typeof SelectorsArg === 'function'
-        ? new SelectorsArg(this.name)
-        : SelectorsArg;
-  }
-
-  reducer(
-    state: BranchStateT = this.defaultState,
+  const reducer = (
+    state: BranchStateT = defaultState,
     _action: AnyAction
-  ): BranchStateT {
+  ): BranchStateT => {
     const action = _action as StateBranchAction<ItemT, BranchStateT>;
     const items = ensureArray<ItemT>(action.items);
     const type = action.type.split('/', 2).join('/');
 
     switch (type) {
-      case this.constant.CREATE:
+      case constant.CREATE:
         const newCreateItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
@@ -389,7 +281,7 @@ export class StateBranch<
             ...newCreateItems
           }
         };
-      case this.constant.UPDATE:
+      case constant.UPDATE:
         const newUpdateItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = {
             ...(state.items[item.id] || {}),
@@ -405,7 +297,7 @@ export class StateBranch<
             ...newUpdateItems
           }
         };
-      case this.constant.REPLACE:
+      case constant.REPLACE:
         const newReplaceItems = items.reduce((acc, item: ItemT) => {
           acc[item.id] = item;
           return acc;
@@ -418,7 +310,7 @@ export class StateBranch<
             ...newReplaceItems
           }
         };
-      case this.constant.REMOVE:
+      case constant.REMOVE:
         const newRemoveItems = items.reduce(
           (acc, item: ItemT) => {
             delete acc[item.id];
@@ -431,16 +323,33 @@ export class StateBranch<
           ...state,
           items: newRemoveItems
         };
-      case this.constant.SET_META:
+      case constant.SET_META:
         return {
           ...state,
           ...action.meta
         };
-      case this.constant.RESET:
+      case constant.RESET:
       case RESET_ALL:
-        return this.defaultState;
+        return defaultState;
       default:
-        return this.extendedReducer(state, action);
+        return extendedReducer(state, action);
     }
-  }
-}
+  };
+
+  return {
+    name,
+    constant,
+    util: utils,
+    defaultItem,
+    reducer,
+    defaultState,
+    action: {
+      ...defaultActions,
+      ...customActions
+    },
+    select: {
+      ...defaultSelectors,
+      ...customSelectors
+    }
+  };
+};
