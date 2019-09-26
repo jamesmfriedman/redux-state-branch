@@ -217,7 +217,8 @@ export const actions = <
 
 export const stateBranch = <
   ItemT extends AnyItem,
-  BranchStateT extends State<ItemT>,
+  BranchStateT extends State<ItemT>
+>() => <
   ActionsT,
   SelectorsT,
   ConstantsT extends { [key: string]: string },

@@ -27,7 +27,7 @@ Object.defineProperty(window, 'crypto', {
   }
 });
 
-const branch = stateBranch({
+const branch = stateBranch<UserT, BranchStateT>()({
   name,
   constants: {
     CUSTOM: 'CUSTOM_CONSTANT'
@@ -47,7 +47,7 @@ describe('StateBranch', () => {
 });
 
 describe('ID Generation', () => {
-  const customIdBranch = stateBranch({
+  const customIdBranch = stateBranch<UserT, BranchStateT>()({
     name,
     generateId: () => 'custom-id'
   });
@@ -183,7 +183,7 @@ describe('Actions', () => {
 describe('Custom Selectors', () => {
   const { where } = selectors<UserT, BranchStateT>({ name });
 
-  const customSelectorsBranch = stateBranch({
+  const customSelectorsBranch = stateBranch<UserT, BranchStateT>()({
     name,
     defaultState: DEFAULT_STATE,
     selectors: {
@@ -211,7 +211,7 @@ describe('Custom Selectors', () => {
 describe('Custom Actions', () => {
   const { create } = actions<UserT, BranchStateT>({ name });
 
-  const customActionsBranch = stateBranch({
+  const customActionsBranch = stateBranch<UserT, BranchStateT>()({
     name,
     defaultState: DEFAULT_STATE,
     actions: {
@@ -270,7 +270,7 @@ describe('Selectors', () => {
 });
 
 describe('Utils', () => {
-  const utilsBranch = stateBranch({
+  const utilsBranch = stateBranch<UserT, BranchStateT>()({
     name: 'utilsBranch',
     utils: {
       test: 'exists',
