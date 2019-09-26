@@ -258,9 +258,10 @@ export const stateBranch = <
   const defaultSelectors = selectors<ItemT, BranchStateT>({ name });
 
   const reducer = (
-    state: BranchStateT = defaultState,
+    _state: any = defaultState,
     _action: AnyAction
   ): BranchStateT => {
+    const state = _state as BranchStateT;
     const action = _action as StateBranchAction<ItemT, BranchStateT>;
     const items = ensureArray<ItemT>(action.items);
     const type = action.type.split('/', 2).join('/');
