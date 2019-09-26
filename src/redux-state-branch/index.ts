@@ -218,12 +218,7 @@ export const actions = <
 export const stateBranch = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT>
->() => <
-  ActionsT,
-  SelectorsT,
-  ConstantsT extends { [key: string]: string },
-  UtilsT extends { [key: string]: any }
->({
+>() => <ActionsT, SelectorsT, ConstantsT, UtilsT>({
   name,
   defaultItem = {},
   generateId: customGenerateIdFunc = defaultGenerateId,
