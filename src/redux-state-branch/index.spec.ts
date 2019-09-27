@@ -255,6 +255,17 @@ describe('Selectors', () => {
     ).toEqual([branchState.items.testUser]);
   });
 
+  it('mapById', () => {
+    const items = branch.select.mapById({ state });
+    expect(items).toEqual(branchState.items);
+  });
+
+  it('mapByKey', () => {
+    expect(branch.select.mapByKey({ state, key: 'name' })).toEqual({
+      ['James Friedman']: [DEFAULT_STATE.items.testUser]
+    });
+  });
+
   it('where empty', () => {
     expect(
       branch.select.where({

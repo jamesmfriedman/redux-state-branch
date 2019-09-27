@@ -77,7 +77,7 @@ export const selectors = <
 >({
   name
 }: {
-  /* The name of  your branch */
+  /** The name of your branch */
   name: string;
 }) => {
   const all = <StateT>({
@@ -103,6 +103,34 @@ export const selectors = <
       id?: string | null;
     }): ItemT | undefined => {
       return state[name].items[id || ''];
+    },
+    /** Gets an object map of unique ids to items {itemId: ItemT} */
+    mapById: <StateT>({
+      state
+    }: {
+      /** A global state object */
+      state: StateT;
+    }) => state[name].items as { [key: string]: ItemT },
+    /** Gets an object map of values of an item to an item {itemValueForKey: ItemT[]} */
+    mapByKey: <StateT>({
+      state,
+      key
+    }: {
+      /** A global state object */
+      state: StateT;
+      /** The key would would like to map the object by */
+      key: string;
+    }) => {
+      const items = state[name].items as { [key: string]: ItemT };
+
+      return Object.values(items).reduce<{ [key: string]: ItemT[] }>(
+        (acc, item) => {
+          acc[item[key]] = acc[item[key]] || [];
+          acc[item[key]].push(item);
+          return acc;
+        },
+        {}
+      );
     },
     /** Get items that meet a filter condition */
     where: <StateT>({
