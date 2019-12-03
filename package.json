@@ -15,7 +15,7 @@
     "test": "react-app-rewired test --env=jsdom",
     "preversion": "export CI=true && npm run test",
     "version": "npm run build",
-    "postpublish": "npm run build:docs && git add --all && git commit -f 'Building docs' && git push",
+    "postpublish": "npm run build:docs && git add --all && git commit --allow-empty -m 'Building docs' && git push",
     "docgen": "documentalist ./src/redux-state-branch/index.ts --no-css --no-md > ./src/docs/api-reference/generated-props.json"
   },
   "devDependencies": {
