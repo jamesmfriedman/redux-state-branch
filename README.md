@@ -13,11 +13,6 @@ While this library was created to alleviate some of the overhead of managing red
 ## Installation
 - `npm install redux-state-branch`
  
-## Typescript and Flow setup
-- This project supports both Typescript and Flow out of the box.
-- For Typescript, no additional configuration is necessary
-- For Flow, depending on your setup, it will either work out of the box, or add it to your `.flowconfig` as follows:
-
 ```yaml
 [libs]
 node_modules/redux-state-branch/flow-typed
