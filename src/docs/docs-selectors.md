@@ -1,67 +1,152 @@
 # Selectors
 
-Selectors are the equivalent of queries for Redux. They are the best way to keep the shape of your state separate from the shape of your apps view data. `redux-state-branch` comes with a few built in selectors that you can leverage to build more of your own. 
+Selectors are the equivalent of queries for Redux. They are the best way to keep the shape of your state separate from the shape of your apps view logic. Redux StateBranch comes with some built in selectors that you can leverage to build more of your own. 
 
-## Selectors API
-All selector methods take the stores state object as their first argument.
+## Using Selectors
+Redux StateBranch comes with a handful of selector primitives to help get data out of your state. Any selector is available for use as `todosBranch.select.yourSelectorName`.
 
-```js
-class Selectors {
-  /**
-   * Select a single item by ID 
-   */
-  byId(state: IState, id: ID): T | void {}
+```jsx
+import { todosBranch } from 'state/todos'; 
+import { resetAllBranches } from 'redux-state-branch';
 
-  /**
-   * Select all items from a branch
-   * Returns an array of items.
-   */
-  all(state: IState): Items[] {}
+function TodosExample() {
+  // all: Select all todos from the branch as an array
+  const allTodos = useSelector(state => todosBranch.select.all(state));
+    
+  // byId: Select a specific todo
+  const allTodos = useSelector(state => todosBranch.select.byId(state, {id: 'myTodoId'}));
 
-  /**
-   * Select items that meet a certain condition
-   * Returns an array of items.
-   */
-  where(state: IState, condition: (item: ItemT<T>) => boolean): Items[] {}
+  // where: Select todos that meet a condition as an array
+  const doneTodos = useSelector(state => todosBranch.select.where(state, {callback: (todo) => !!todo.isDone})),
+  
+  // mapById: Get a map of ids to items
+  // returns
+  // {
+  //  '1': {id: '1', text: 'hello', priority: 'low'}
+  //  '2': {id: '2', text: 'another todo', priority: 'low'}
+  // }
+  const todosMap = useSelector(state => todosBranch.select.mapById(state));
 
-  /**
-   * Select all of the meta information, the top level
-   * data stored alongside of items.
-   * Returns an object containing the meta information.
-   */
-  meta(state: IState): { [key: string]: any } | void {}
+  // mapByKey: Get a map of a subkey value to an array of matching items
+  // returns
+  // {
+  //  'low': [{id: '1', text: 'hello', priority: 'low'}, {id: '2', priority: 'low', ...}],
+  //  'medium': [{id: '1', text: 'hello', priority: 'medium'}, {id: '2', priority: 'medium', ...}],
+  //  ...
+  // }
+  const todosMap = useSelector(state => todosBranch.select.mapByKey(state, {key: 'priority'}));
+
+  // Select the meta (top level) data
+  // returns {loading: true, viewByFilter: 'todo'}
+  const meta = useSelector(state => todosBranch.select.meta(state));
 }
+
+// The above examples based on these type structures
+// Including them here for reference
+export type TodoT = {
+  id: string;
+  priority: 'low' | 'medium' | 'high'
+  isDone: boolean;
+  text: '';
+};
+
+export type TodoStateT = {
+  loading: boolean;
+  viewByFilter: 'todo' | 'done' | 'low' | 'normal' | 'high';
+  items: { [id: string]: TodoT };
+};
 ```
 
 ## Adding Custom Selectors
 
-To add custom selectors, import and extend the Selectors class and pass it to the StateBranch constructor. If you've already read the section on actions, this should look familiar.
+You could build an entire app using the included primitives, but you'll likely want to be more specific in how you handle getting data out of your state. You can make easily make custom selectors while still leveraging the built in primitives.
 
+`state/todos/index.tsx`
 ```js
-// state/todos/index.js
-
 // import Selectors
-import { StateBranch, Actions, Selectors } from 'redux-state-branch';
+import { stateBranch, createSelectors } from 'redux-state-branch';
 
-// Create Todo Selectors class
-class TodosSelectors extends Selectors {
-  // returns the current viewByFilter
-  viewByFilter(state) {
-    return this.meta(state).viewByFilter;
-  }
+const name = 'todos';
 
-  // returns top level loading
-  loading(state) {
-    return this.meta(state).loading;
-  }
+// Create base selectors
+const selectors = createSelectors<TodoT, TodoStateT>({name});
 
-  // Show our visible todos
-  visibleTodos(state) {
-    const viewByFilter = this.viewByFilter(state);
+// defined out here for reuse
+// returns the current viewByFilter
+const viewByFilter = (state) => {
+  return selectors.meta(state).viewByFilter;
+};
+
+// Create custom selectors
+const customSelectors = {
+  viewByFilter,
+
+  // returns top level loading property
+  isLoading: (state) => {
+    return selectors.meta(state).loading;
+  },
+
+  // Select only visible todos
+  visibleTodos: (state) => {
+    const currentViewFilter = viewByFilter(state);
     
     // run our where clause
-    return this.where(state, todo => {
-      switch (viewByFilter) {
+    return selectors.where(state, { callback: todo => {
+      switch (currentViewFilter) {
+        case 'todo':
+          return !todo.isDone;
+        case 'done':
+          return todo.isDone;
+        case 'low':
+        case 'normal':
+        case 'high':
+          return todo.priority === viewByFilter;
+        default:
+          return true;
+      }
+    }});
+  }
+}
+
+export const todosBranch = stateBranch()({ 
+  name: 'todos',
+  // pass in our custom selectors
+  selectors: {
+    ...customSelectors,
+    ...selectors
+  },
+  ...
+});
+
+// Your selectors will be available now under `todosBranch.select.yourSelectorName`
+todosBranch.select.visibleTodos(state);
+```
+
+
+## Usage with Reselect
+[Reselect](https://github.com/reduxjs/reselect) is a massively popular library for memoizing redux selectors. Using Reselect with Redux StateBranch works out of the box. Make sure `reselect` is installed and you're good to go.
+
+```js
+// import reselect
+import { createSelector } from 'reselect;
+import { stateBranch, createSelectors } from 'redux-state-branch';
+
+const name = 'todos';
+
+const selectors = createSelectors({name});
+
+const viewByFilter = (state) => {
+  return selectors.meta(state).viewByFilter;
+};
+
+const customSelectors = {
+  viewByFilter,
+
+  // Adding in createSelector for memoization
+  // and refactoring so that it only recomputes when viewByFilter or todos change
+  visibleTodos: createSelector(selectors.all, viewByFilter, (allTodos, currentViewFilter) => {
+    return allTodos.filter(todo => {
+      switch (currentViewFilter) {
         case 'todo':
           return !todo.isDone;
         case 'done':
@@ -77,62 +162,13 @@ class TodosSelectors extends Selectors {
   }
 }
 
-class TodosActions extends Actions {
-  ...
-}
-
-export const todosBranch = new StateBranch({ 
+export const todosBranch = stateBranch()({ 
   name: 'todos',
-  actions: TodosActions,
-  // pass in our custom actions
-  selectors: TodosSelectors,
-  // default state and default item can be whatever we need
-  // here we are adding loading and the concept of a viewByFilter.
-  defaultState: {
-    loading: false,
-    viewByFilter: 'all',
-    items: {
-      '1': {
-        id: '1',
-        text: '',
-        priority: 'normal',
-        isDone: false
-      }
-    }
+  // pass in our custom selectors
+  selectors: {
+    ...customSelectors,
+    ...selectors
   },
-  defaultItem: {
-    text: '',
-    priority: 'normal',
-    isDone: false
-  }
   ...
 });
-```
-
-
-## Using Selectors
-Any selector will now be available for use as `todosBranch.select.yourSelectorName`.
-
-```jsx
-import * as React from 'react';
-import { connect } from 'react-redux';
-import { todosBranch } from './state/todos';
-
-// Back in your view where you are connecting your component to Redux.
-const TodosExample = connect(
-  state => ({
-    // Select all Todos from the Todos branch
-    all: todosBranch.select.all(state),
-    // Select a specific todo
-    todo: todosBranch.select.byId(state, 'my-id'),
-    // Select the meta information
-    meta: todosBranch.select.meta(state),
-    // Select todos that meet a condition
-    doneTodos: todosBranch.select.where(state, (todo) => !!todo.isDone),
-    // Use your custom selectors
-    visibleTodos: todosBranch.select.visibleTodos(state),
-    isLoading: todosBranch.select.isLoading(state),
-  }),
-  dispatch => ({...})
-)(TodosExample_);
 ```

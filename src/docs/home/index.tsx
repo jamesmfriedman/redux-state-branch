@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { Link } from 'react-router-dom';
-import { Icon } from 'rmwc/Icon';
-import { Fab } from 'rmwc/Fab';
+import { Icon } from '@rmwc/icon';
+import { Fab } from '@rmwc/fab';
 import { Tree } from '../tree';
 
 import './home.styles.css';
@@ -26,7 +26,7 @@ export const Home = () => (
           <Icon icon="check" /> &lt; 5 KB
         </li>
         <li>
-          <Icon icon="check" /> Typescript + Flow Support
+          <Icon icon="check" /> Typescript Support
         </li>
       </ul>
 
@@ -34,7 +34,7 @@ export const Home = () => (
         tag={Link}
         {...{ to: '/getting-started' }}
         label="Get Started"
-        icon="keyboard_arrow_right"
+        trailingIcon="keyboard_arrow_right"
       />
     </div>
   </div>

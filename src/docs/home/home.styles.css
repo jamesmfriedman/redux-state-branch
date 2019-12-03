@@ -13,9 +13,10 @@
 }
 
 .home__title {
-  font-size: 4rem !important;
+  font-size: 3rem !important;
   line-height: 1 !important;
-  margin: 2.5rem 0 1.5rem 0 !important;
+  margin: 0 0 1.5rem 0 !important;
+  color: var(--mdc-theme-primary) !important;
 }
 
 .home__subtitle {
@@ -27,9 +28,9 @@
 }
 
 .home__npm-install {
-  color: var(--mdc-theme-secondary);
-  border: 2px solid var(--mdc-theme-secondary);
-  border-radius: 3px;
+  color: #e83e8c;
+  border: 2px solid #e83e8c;
+  border-radius: 8px;
   padding: 0.5rem 1rem;
   font-size: 1.5rem;
   display: inline-block;

@@ -1,6 +1,6 @@
 # Setup Redux
 
-If you already have Redux setup, you can skip this. There aren't any custom steps to make `redux-state-branch` work, but trying to find a simple straightforward tutorial on the subject can be challenging. The following directions are for a web browser.
+Setting up Redux can range from simple to complicated and tends to be one of the major pain points for beginners. Redux StateBranch comes with a simplified `createStore` function to help with some of the complexity. You're not required to use this, but it's here for convenience.
 
 ## Install redux
 `bash
@@ -8,27 +8,17 @@ npm install react-redux
 `
 
 ## Basic Store Setup
-Create a file in your src folder called `state/store.js`;
+Create a file in your src folder called `state/store.tsx`;
 
 ```js
-import {
-  combineReducers,
-  compose,
-  createStore as reduxCreateStore
-} from 'redux';
+import { createStore } from 'redux-state-branch';
 
-// Easiest way to get devtools working in your browser if you have the extension installed
-const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-const rootReducer = combineReducers({
-  // your reducers will go here
+export const store = createStore({
+  devTools: true, 
+  reducers: {
+    // Your reducers will go here
+  }
 });
-
-const enhancer = composeEnhancers();
-
-export const createStore = () => {
-  return reduxCreateStore(rootReducer, enhancer);
-};
 ```
 
 ## Adding Async Actions (Recommended)
@@ -38,34 +28,22 @@ Unless you're writing a client side only app, you'll probably want to interface 
 npm install redux-thunk
 ```
 
-Back in your `state/store.js` file...
+Back in your `state/store.tsx` file...
 ```js
-import {
-  combineReducers,
-  applyMiddleware, //import this
-  compose,
-  createStore as reduxCreateStore
-} from 'redux';
-
+import { createStore } from 'redux-state-branch';
 import thunk from 'redux-thunk';
 
-const composeEnhancers =
-  (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-const rootReducer = combineReducers({
-  
+export const store = createStore({
+  devTools: true,
+  middleware: [thunk],
+  reducers: {
+    // Your reducers will go here
+  }
 });
-
-// basically the same as above except we add the thunk middleware
-const enhancer = composeEnhancers(applyMiddleware(thunk));
-
-export const createStore = () => {
-  return reduxCreateStore(rootReducer, enhancer);
-};
 ```
 
 ## Add your store to your app
-In your main index.js file, create your store and add it to your app.
+In your main `index.tsx` file, create your store and add it to your app.
 
 ```js
 import * as React from 'react';
@@ -73,9 +51,7 @@ import * as ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
 
 import App from './app';
-import { createStore } from './state/store';
-
-const store = createStore();
+import { store } from './state/store';
 
 ReactDOM.render(
   <Provider store={store}>

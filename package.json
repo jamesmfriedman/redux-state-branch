@@ -9,35 +9,49 @@
     "redux": "^4.0.0"
   },
   "scripts": {
-    "start": "react-app-rewired start --scripts-version react-scripts-ts",
+    "start": "react-app-rewired start",
     "build": "./scripts/build.sh",
-    "build:docs": "rm -R -f docs && react-app-rewired build --scripts-version react-scripts-ts && mv build docs",
-    "test": "react-app-rewired test --scripts-version react-scripts-ts --env=jsdom",
+    "build:docs": "rm -R -f docs && react-app-rewired build && mv build docs",
+    "test": "react-app-rewired test --env=jsdom",
     "preversion": "export CI=true && npm run test",
     "version": "npm run build",
-    "eject": "react-scripts-ts eject"
+    "postpublish": "npm run build:docs && git add --all && git commit -f 'Building docs' && git push",
+    "docgen": "documentalist ./src/redux-state-branch/index.ts --no-css --no-md > ./src/docs/api-reference/generated-props.json"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.1",
-    "@types/node": "^9.6.26",
-    "@types/react": "^16.4.9",
-    "@types/react-dom": "^16.0.7",
-    "@types/react-redux": "^6.0.6",
-    "@types/react-router-dom": "^4.3.0",
-    "@types/react-test-renderer": "^16.0.2",
+    "@types/jest": "^24.0.23",
+    "@types/node": "^12.12.14",
+    "@types/react": "^16.9.13",
+    "@types/react-dom": "^16.9.4",
+    "@types/react-redux": "^7.1.5",
+    "@types/react-router-dom": "^5.1.3",
+    "@types/react-test-renderer": "^16.9.1",
     "@types/redux-thunk": "^2.1.0",
-    "flowgen": "^1.2.2",
-    "normalize.css": "^8.0.0",
-    "prettier-tslint": "^0.4.0",
-    "prismjs": "^1.15.0",
-    "react": "^16.4.2",
-    "react-app-rewired": "^1.5.2",
-    "react-dom": "^16.4.2",
+    "documentalist": "^1.6.0",
+    "normalize.css": "^8.0.1",
+    "prettier": "^1.19.1",
+    "prettier-tslint": "^0.4.2",
+    "prismjs": "^1.17.1",
+    "react": "^16.12.0",
+    "react-app-rewired": "^2.1.5",
+    "react-dom": "^16.12.0",
     "react-markdown-loader": "git+https://github.com/jamesmfriedman/react-markdown-loader.git",
-    "react-redux": "^5.0.7",
-    "react-router-dom": "^4.3.1",
-    "react-scripts-ts": "2.17.0",
-    "rmwc": "^1.9.2",
-    "typescript": "^3.4.5"
+    "react-redux": "^7.1.3",
+    "react-router-dom": "^5.1.2",
+    "react-scripts": "^3.2.0",
+    "rmwc": "^5.7.1",
+    "typescript": "^3.7.2"
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
   }
 }

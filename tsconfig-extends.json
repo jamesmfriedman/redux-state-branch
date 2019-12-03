@@ -1,0 +1,9 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "redux-state-branch": ["src/redux-state-branch"],
+      "redux-state-branch/*": ["src/redux-state-branch/*"]
+    }
+  }
+}

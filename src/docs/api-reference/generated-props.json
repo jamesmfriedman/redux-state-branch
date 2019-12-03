@@ -1,0 +1,633 @@
+{
+  "npm": {},
+  "typescript": {
+    "AnyItem": {
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "interface",
+      "name": "AnyItem",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L20",
+      "indexSignature": {
+        "fileName": "src/redux-state-branch/index.ts",
+        "kind": "signature",
+        "name": "__index",
+        "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L21",
+        "parameters": [
+          {
+            "flags": {
+              "isExported": false,
+              "isExternal": false,
+              "isOptional": false,
+              "isPrivate": false,
+              "isProtected": false,
+              "isPublic": false,
+              "isRest": false,
+              "isStatic": false
+            },
+            "kind": "parameter",
+            "name": "extraProps",
+            "type": "string"
+          }
+        ],
+        "returnType": "any",
+        "type": "{ [extraProps: string]: any }"
+      },
+      "methods": [],
+      "properties": [
+        {
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "id",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L21",
+          "type": "string"
+        }
+      ]
+    },
+    "StateBranchAction": {
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "interface",
+      "name": "StateBranchAction",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L28",
+      "extends": [
+        "AnyAction"
+      ],
+      "indexSignature": {
+        "fileName": "src/redux-state-branch/index.ts",
+        "kind": "signature",
+        "name": "__index",
+        "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L15",
+        "parameters": [
+          {
+            "flags": {
+              "isExported": false,
+              "isExternal": false,
+              "isOptional": false,
+              "isPrivate": false,
+              "isProtected": false,
+              "isPublic": false,
+              "isRest": false,
+              "isStatic": false
+            },
+            "kind": "parameter",
+            "name": "extraProps",
+            "type": "string"
+          }
+        ],
+        "returnType": "any",
+        "type": "{ [extraProps: string]: any }"
+      },
+      "methods": [],
+      "properties": [
+        {
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "items",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L29",
+          "type": "{ [key: string]: ItemT }"
+        },
+        {
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "meta",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L30",
+          "type": "BranchStateT"
+        },
+        {
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "type",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L15",
+          "inheritedFrom": "AnyAction.type",
+          "type": "T"
+        }
+      ]
+    },
+    "State": {
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "interface",
+      "name": "State",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L33",
+      "indexSignature": {
+        "fileName": "src/redux-state-branch/index.ts",
+        "kind": "signature",
+        "name": "__index",
+        "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L34",
+        "parameters": [
+          {
+            "flags": {
+              "isExported": false,
+              "isExternal": false,
+              "isOptional": false,
+              "isPrivate": false,
+              "isProtected": false,
+              "isPublic": false,
+              "isRest": false,
+              "isStatic": false
+            },
+            "kind": "parameter",
+            "name": "key",
+            "type": "string"
+          }
+        ],
+        "returnType": "any",
+        "type": "{ [key: string]: any }"
+      },
+      "methods": [],
+      "properties": [
+        {
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "items",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L34",
+          "type": "{ [key: string]: Item }"
+        }
+      ]
+    },
+    "CreateSelectorOpts": {
+      "documentation": {
+        "contents": [
+          "<p>Selectors</p>\n"
+        ],
+        "contentsRaw": "Selectors",
+        "metadata": {}
+      },
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "interface",
+      "name": "CreateSelectorOpts",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L78",
+      "methods": [],
+      "properties": [
+        {
+          "documentation": {
+            "contents": [
+              "<p>The name of your branch</p>\n"
+            ],
+            "contentsRaw": "The name of your branch",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "name",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L80",
+          "type": "string"
+        }
+      ]
+    },
+    "CreateActionsOpts": {
+      "documentation": {
+        "contents": [
+          "<p>A factory method for creating action primitives.</p>\n"
+        ],
+        "contentsRaw": "A factory method for creating action primitives.",
+        "metadata": {}
+      },
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "interface",
+      "name": "CreateActionsOpts",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L173",
+      "methods": [],
+      "properties": [
+        {
+          "documentation": {
+            "contents": [
+              "<p>A default item used when creating new items</p>\n"
+            ],
+            "contentsRaw": "A default item used when creating new items",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "defaultItem",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L177",
+          "type": "Partial<ItemT>"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>A default item used when creating new items</p>\n"
+            ],
+            "contentsRaw": "A default item used when creating new items",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "generateId",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L179",
+          "type": "undefined | () => string"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>The name of your branch</p>\n"
+            ],
+            "contentsRaw": "The name of your branch",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "name",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L175",
+          "type": "string"
+        }
+      ]
+    },
+    "StateBranchOpts": {
+      "documentation": {
+        "contents": [
+          "<p>State Branch</p>\n"
+        ],
+        "contentsRaw": "State Branch",
+        "metadata": {}
+      },
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "interface",
+      "name": "StateBranchOpts",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L256",
+      "methods": [],
+      "properties": [
+        {
+          "documentation": {
+            "contents": [
+              "<p>Additional actions to use with your branch.</p>\n"
+            ],
+            "contentsRaw": "Additional actions to use with your branch.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "actions",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L267",
+          "type": "ActionsT"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>Additional constants to use with your branch.</p>\n"
+            ],
+            "contentsRaw": "Additional constants to use with your branch.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "constants",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L271",
+          "type": "ConstantsT"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>A defaultItem to be merged into newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the defaultItem to the <code>createActions</code> factory.</p>\n"
+            ],
+            "contentsRaw": "A defaultItem to be merged into newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the defaultItem to the `createActions` factory.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "defaultItem",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L275",
+          "type": "Partial<ItemT>"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>An initial state for the reducer.</p>\n"
+            ],
+            "contentsRaw": "An initial state for the reducer.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "defaultState",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L277",
+          "type": "BranchStateT"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>A custom id generating function for newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the generateId function to the <code>createActions</code> factory.</p>\n"
+            ],
+            "contentsRaw": "A custom id generating function for newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the generateId function to the `createActions` factory.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "generateId",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L281",
+          "type": "undefined | () => string"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>The name of your branch.</p>\n"
+            ],
+            "contentsRaw": "The name of your branch.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": false,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "name",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L265",
+          "type": "string"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>Custom reducer handling to be used in addition to Redux StateBranch&#39;s built in handling.</p>\n"
+            ],
+            "contentsRaw": "Custom reducer handling to be used in addition to Redux StateBranch's built in handling.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "reducer",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L279",
+          "type": "Reducer<BranchStateT>"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>Additional selectors to use with your branch.</p>\n"
+            ],
+            "contentsRaw": "Additional selectors to use with your branch.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "selectors",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L269",
+          "type": "SelectorsT"
+        },
+        {
+          "documentation": {
+            "contents": [
+              "<p>Additional utilities to use with your branch.</p>\n"
+            ],
+            "contentsRaw": "Additional utilities to use with your branch.",
+            "metadata": {}
+          },
+          "fileName": "src/redux-state-branch/index.ts",
+          "flags": {
+            "isExported": true,
+            "isExternal": false,
+            "isOptional": true,
+            "isPrivate": false,
+            "isProtected": false,
+            "isPublic": false,
+            "isRest": false,
+            "isStatic": false
+          },
+          "kind": "property",
+          "name": "utils",
+          "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L273",
+          "type": "UtilsT"
+        }
+      ]
+    },
+    "ItemsT": {
+      "fileName": "src/redux-state-branch/index.ts",
+      "flags": {
+        "isExported": true,
+        "isExternal": false,
+        "isOptional": false,
+        "isPrivate": false,
+        "isProtected": false,
+        "isPublic": false,
+        "isRest": false,
+        "isStatic": false
+      },
+      "kind": "type alias",
+      "name": "ItemsT",
+      "sourceUrl": "https://github.com/jamesmfriedman/redux-state-branch/blob/da676cd/src/redux-state-branch/index.ts#L26",
+      "type": "Partial<T> | Array<Partial<T>>"
+    }
+  }
+}

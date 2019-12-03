@@ -16,17 +16,15 @@ import { App } from './app';
 import './index.css';
 import { Provider } from 'react-redux';
 import { BrowserRouter as Router } from 'react-router-dom';
-import { createStore } from './state/store';
-import { ThemeProvider } from 'rmwc/Theme';
-
-const store = createStore();
+import { store } from './state/store';
+import { ThemeProvider } from '@rmwc/theme';
 
 ReactDOM.render(
   <Provider store={store}>
     <Router basename={process.env.PUBLIC_URL}>
       <ThemeProvider
         options={{
-          primary: '#00acc1',
+          primary: '#764abc',
           secondary: 'black'
         }}
       >

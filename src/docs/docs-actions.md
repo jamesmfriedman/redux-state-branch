@@ -1,133 +1,155 @@
 # Actions
 
-In a typical Redux setup, Action creators describe a way to change the state and the reducer actually modifies it. In Redux State Branch, actions are responsible for modifying the state and then calling any of the built in CRUD methods. You might have seen these built in CRUD methods used in the previous Branches example.
+Action creators are functions that create action objects that are dispatched to your reducers.
 
-## Actions API
-By default, each branch has the following actions available. The only expectation of any item being passed is that it contains an `id`. 
+## Using Actions
 
-```js
-class Actions {
-  /**
-   * Creates an item or an array of items
-   * If you've provided a `defaultItem` to your reducer
-   * it will be shallowly merged into each item.
-   * If you don't pass an ID, one will be created for you.
-   */
-  create(items?: ItemsT<T>, devToolsSuffix?: string) {}
+Redux StateBranch comes with action creator primitives that you can use to take CRUD like actions on your reducer. You should have already seen some of these methods used in the previous [Branches example](./branches).
 
-  /**
-   * Replaces an item or an array of items
-   * based on the items ID.
-   */
-  replace(items: ItemsT<T>) {}
+```jsx
+import { todosBranch } from 'state/todos'; 
+import { resetAllBranches } from 'redux-state-branch';
 
-  /**
-   * Update an item or array of items
-   * An item only needs to contain the ID
-   * as well as the data you would like to update.
-   * It will be shallowly merged over the existing items.
-   */
-  update(items: ItemsT<T>, devToolsSuffix?: string) {}
+function TodosExample() {
+  const dispatch = useDispatch();
 
-  /**
-   * Delete by item, an array of items, 
-   * an id, or an array of IDs
-   */
-  delete(items: ItemsT<T> | ID | ID[], devToolsSuffix?: string) {}
+  // Create a new todo
+  // This will autogenerate a uuid for the 'id' property if id is not specified
+  const createTodo = () => dispatch(todosBranch.action.create({text: 'Hello World'}));
 
-  /**
-   * Set any non-item information at the root of the reducer
-   * i.e. loading, filtering, etc.
-   */
-  setMeta(meta: { [key: string]: any }, devToolsSuffix?: string) {}
+  // Update a todo based on its id
+  // This will shallowly merge in updates over the existing todo
+  // It will also create the todo in the event it doesn't exist
+  const updateTodo = () => dispatch(todosBranch.action.update({id: 'myTodoId', text: 'Change the text to this', iDone: true}));
 
-  /**
-   * Reset the reducer to the initial state
-   */
-  reset(devToolsSuffix?: string) {}
-}  
+  // Remove this todo
+  const removeTodo = () => dispatch(todosBranch.action.remove({id: 'myTodoId'}));
+  // Or remove by id only
+  const removeTodoAlt = () => dispatch(todosBranch.action.remove('myTodoId'));
+
+  // Replace an existing todo with this id with the new object
+  const replaceTodo = () => dispatch(todosBranch.action.replace({id: 'myTodoId', text: 'Replace me', isDone: false, priority: 'low'}));
+
+  // Sets a top level property, anything thats not an "item"
+  const setLoading = () =>  dispatch(todosBranch.action.setMeta({loading: true}));
+
+  // Resets the entire todos reducer to its initial state
+  const reset = () => dispatch(todosBranch.action.reset());
+
+  // Special action creator, will reset ALL state branches to their initial state
+  const resetAll = () => dispatch(resetAllBranches())
+}
+
+// The above examples based on these type structures
+// Including them here for reference
+export type TodoT = {
+  id: string;
+  priority: 'low' | 'medium' | 'high'
+  isDone: boolean;
+  text: '';
+};
+
+export type TodoStateT = {
+  loading: boolean;
+  viewByFilter: 'todo' | 'done' | 'low' | 'normal' | 'high';
+  items: { [id: string]: TodoT };
+};
 ```
+
+## Working with multiple items
+
+Create, update, remove, and replace all handle a single item or an array of items.
+
+```jsx
+function TodosExample() {
+  const dispatch = useDispatch();
+
+  // Create 3 new todos
+  dispatch(todosBranch.action.create([
+    {id: '1' text: 'Todo 1'},
+    {id: '2' text: 'Todo 2'},
+    {id: '3' text: 'Todo 3'}
+  ]))
+
+  // Mark all of the todos as done
+  dispatch(todosBranch.action.update([
+    {id: '1', isDone: true},
+    {id: '2', isDone: true},
+    {id: '3', isDone: true'}
+  ]))
+}
+```
+
 
 
 ## Adding Custom Actions
 
-To add custom actions, import and extend the Actions class and pass it to the StateBranch constructor. Each of your custom actions has to return a valid Redux action which can be done easily by calling one of the built in CRUD methods.
+You could build an entire app using the included primitives, but you'll likely want to be more specific in how you handle your state and actions. You can make easily make custom actions while still leveraging the built in primitives.
 
-```js
-// state/todos/index.js
 
-// import Actions
-import { StateBranch, Actions } from 'redux-state-branch';
+`state/todos/index.tsx`
+```jsx
+// import createActions
+import { stateBranch, createActions } from 'redux-state-branch';
 
-// Create Todo Actions class
-// Here we are creating a couple of new actions
-// to sanitize our data before putting it into our store
-class TodosActions extends Actions {
-  toggleDone(todoId, isDone) {
-    // do some sanitation of isDone to make sure it's a boolean
-    return this.update({ id: todoId, isDone: !!isDone });
-  }
+const name = 'todos'
 
-  updateText(todoId, text) {
+// Create the basic actions
+const actions = createActions<TodoT, TodoStateT>({name});
+
+// Define our custom actions
+const customActions = {
+  toggleDone: (todoId: string, isDone: boolean) => {
+    // an example sanitizing isDone to make sure it's a boolean
+    // and adding a last modified timestamp
+    return actions.update({ id: todoId, isDone: !!isDone, lastModified: Date.now() });
+  },
+  updateText: (todoId: string, text: string) => {
     // capitalize the first letter
     text = text.charAt(0).toUpperCase() + text.slice(1);
     
     // Call update. We can optionally pass a string suffix
     // that will show up in our devTools
-    return this.update({ id: todoId, text }, 'updateText');
+    return actions.update({ id: todoId, text }, 'updateText');
   }
 }
 
-export const todosBranch = new StateBranch({ 
-  name: 'todos',
-  // pass in our custom actions
-  actions: TodosActions,
+export const todosBranch = stateBranch()({ 
+  name,
+  // Pass in our custom actions
+  actions: {
+    ...customActions,
+    ...actions
+  }
   ...
 });
-```
 
-
-## Using Actions
-Any action will now be available for dispatch as `todosBranch.action.yourActionName`.
-
-```jsx
-import * as React from 'react';
-import { connect } from 'react-redux';
-import { todosBranch } from './state/todos';
-
-// Back in your view where you are connecting your component to Redux.
-const TodosExample = connect(
-  state => ({...}),
-  dispatch => ({
-    // Calling built in actions
-    createTodo: () => dispatch(todosBranch.action.create()),
-    resetTodos: () => dispatch(todosBranch.action.reset()),
-    deleteTodo: todo => dispatch(todosBranch.action.delete(todo)),
-    // Calling the custom actions we created
-    updateTodoText: (todoId, text) => dispatch(todosBranch.action.updateText(todoId, text)),
-    toggleTodoDone: (todoId, isDone) => dispatch(todosBranch.action.toggleDone(todoId, isDone)),
-  })
-)(TodosExample_);
+// Your actions will be available now under `todosBranch.action.yourActionName`
+todosBranch.action.toggleDone('myTodoId', true);
 ```
 
 ## Async Actions
 
-Most apps are going to have some communication with a backend. `redux-state-branch` works with any async middleware, but `redux-thunk` is by far the easiest. Make sure you have `redux-thunk` installed and setup correctly and then you can add async actions as follows:
+Most apps are going to have some communication with a backend. Redux StateBranch works with any async middleware/ The following example uses `redux-thunk` since it's one of easiest patterns to understand. Make sure you have `redux-thunk` installed and setup correctly and then you can add async actions as follows:
 
-```js
-// state/todos/index.js
+`state/todos/index.tsx`
+```jsx
+// import createActions
+import { stateBranch, createActions } from 'redux-state-branch';
 
-// import Actions
-import { StateBranch, Actions } from 'redux-state-branch';
+const name = 'todos'
 
-// Async actions return a function that gets passed dispatch
-class TodosActions extends Actions {
-  // An Async action that updates the local store
-  // and then calls the server
-  changeOwner(todoId, ownerId) {
+// Create the basic actions
+const actions = createActions({name});
+
+// Define our custom actions
+const customActions = {
+  // An Async action that updates the local store optimistically
+  // and makes a call to a server
+  changeOwner: (todoId: string, ownerId: string) => {
     return async (dispatch) => {
       // Optimistically update our todo
-      dispatch(this.update({
+      dispatch(actions.update({
         id: todoId, 
         ownerId
       }))
@@ -137,23 +159,34 @@ class TodosActions extends Actions {
     }
   },
 
-  // An async action that overloads the built in create action
-  create(todoData) {
+  // An async action that creates
+  createNewTodo(todoData) {
     return async (dispatch) => {
       // call our server
       const todo = await fetch('/createTodo', ...yourFetchOptions);
       
       // create our todo in the store
-      dispatch(super.create(todo))
+      dispatch(actions.create(todo))
     }
-  },
-
+  }
 }
 
-export const todosBranch = new StateBranch({ 
-  name: 'todos',
-  // pass in our custom actions
-  actions: TodosActions,
+export const todosBranch = stateBranch()({ 
+  name,
+  // Pass in our custom actions
+  actions: {
+    ...customActions,
+    ...actions
+  }
   ...
 });
+```
+
+You can use the same action creators inside or redux-observable, epics, sagas, and anything else. These all generate actions with constants for the types which you can listen to. Look at your Redux dev tools for a better understanding of what actions Redux StateBranch creates.
+
+```jsx
+dispatch(todosBranch.action.create({...}, 'myCustomSuffix'))
+
+// Generates an action with the following format:
+{type: 'todos/CREATE/myCustomSuffix', items: [...]}
 ```

@@ -7,7 +7,7 @@ module.exports = function override(config, env) {
   );
 
   // grab the "oneOf" rule
-  const rules = config.module.rules[1].oneOf;
+  const rules = config.module.rules[2].oneOf;
 
   // add a markdown loader
   rules.unshift(

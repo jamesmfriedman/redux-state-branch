@@ -1,4 +1,9 @@
-import { stateBranch, resetAllBranches, actions, selectors } from '.';
+import {
+  stateBranch,
+  resetAllBranches,
+  createActions,
+  createSelectors
+} from '.';
 
 type UserT = {
   id: string;
@@ -93,7 +98,7 @@ describe('Actions', () => {
     const action = branch.action.create({ name: 'Cookie Monster' });
     const item = action.items[0];
     const state = branch.reducer(undefined, action);
-    expect(state.items[item.id]).toEqual(item);
+    expect((state.items as any)[item.id]).toEqual(item);
   });
 
   it('update', () => {
@@ -181,14 +186,14 @@ describe('Actions', () => {
 });
 
 describe('Custom Selectors', () => {
-  const { where } = selectors<UserT, BranchStateT>({ name });
+  const { where } = createSelectors<UserT, BranchStateT>({ name });
 
   const customSelectorsBranch = stateBranch<UserT, BranchStateT>()({
     name,
     defaultState: DEFAULT_STATE,
     selectors: {
       customSelector(state: { [name]: BranchStateT }) {
-        return where({ state, callback: u => u.id === 'customUserId' });
+        return where(state, { callback: u => u.id === 'customUserId' });
       }
     }
   });
@@ -209,7 +214,7 @@ describe('Custom Selectors', () => {
 });
 
 describe('Custom Actions', () => {
-  const { create } = actions<UserT, BranchStateT>({ name });
+  const { create } = createActions<UserT, BranchStateT>({ name });
 
   const customActionsBranch = stateBranch<UserT, BranchStateT>()({
     name,
@@ -225,7 +230,7 @@ describe('Custom Actions', () => {
     const action = customActionsBranch.action.customAction();
     const item = action.items[0];
     const state = customActionsBranch.reducer(undefined, action);
-    expect(state.items[item.id]).toEqual(item);
+    expect((state.items as any)[item.id]).toEqual(item);
   });
 });
 
@@ -234,49 +239,46 @@ describe('Selectors', () => {
   const state = { [branch.name]: branchState };
 
   it('byId', () => {
-    expect(branch.select.byId({ state, id: 'testUser' })).toBe(
+    expect(branch.select.byId(state, { id: 'testUser' })).toBe(
       DEFAULT_STATE.items.testUser
     );
   });
 
   it('byId undefined', () => {
-    expect(branch.select.byId({ state, id: 'nonExistant' })).toBeUndefined();
+    expect(branch.select.byId(state, { id: 'nonExistant' })).toBeUndefined();
   });
 
   it('all', () => {
-    expect(branch.select.all({ state })).toEqual(
-      Object.values(branchState.items)
-    );
+    expect(branch.select.all(state)).toEqual(Object.values(branchState.items));
   });
 
   it('where', () => {
     expect(
-      branch.select.where({ state, callback: user => user.id === 'testUser' })
+      branch.select.where(state, { callback: user => user.id === 'testUser' })
     ).toEqual([branchState.items.testUser]);
   });
 
   it('mapById', () => {
-    const items = branch.select.mapById({ state });
+    const items = branch.select.mapById(state);
     expect(items).toEqual(branchState.items);
   });
 
   it('mapByKey', () => {
-    expect(branch.select.mapByKey({ state, key: 'name' })).toEqual({
+    expect(branch.select.mapByKey(state, { key: 'name' })).toEqual({
       ['James Friedman']: [DEFAULT_STATE.items.testUser]
     });
   });
 
   it('where empty', () => {
     expect(
-      branch.select.where({
-        state,
+      branch.select.where(state, {
         callback: user => user.id === 'nonExistant'
       })
     ).toEqual([]);
   });
 
   it('meta', () => {
-    expect(branch.select.meta({ state })).toEqual(branchState);
+    expect(branch.select.meta(state)).toEqual(branchState);
   });
 });
 
@@ -295,5 +297,18 @@ describe('Utils', () => {
 
   it('func', () => {
     expect(typeof utilsBranch.util.func).toBe('function');
+  });
+});
+
+describe('Supports additional key / items', () => {
+  const epics = [() => {}];
+
+  const epicsBranch = stateBranch<UserT, BranchStateT>()({
+    name: 'anything',
+    epics
+  });
+
+  it('string', () => {
+    expect(epicsBranch.epics).toBe(epics);
   });
 });

@@ -1,0 +1,39 @@
+.api table {
+  border-collapse: collapse;
+}
+
+.api td code {
+  display: inline-block;
+  margin-left: -5px;
+  margin-bottom: 0.25rem;
+}
+
+.api td {
+  vertical-align: top;
+}
+
+.api td:nth-child(1),
+.api td:nth-child(2) {
+  width: 320px;
+}
+
+.api td {
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.api th {
+  text-align: left;
+}
+
+.api td,
+.api th {
+  padding: 1rem;
+}
+
+.api ul {
+  margin: 0;
+}
+
+.api li {
+  margin-bottom: 0.5rem;
+}

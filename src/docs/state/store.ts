@@ -1,22 +1,11 @@
-import {
-  combineReducers,
-  applyMiddleware,
-  compose,
-  createStore as reduxCreateStore
-} from 'redux';
-
+import { createStore } from 'redux-state-branch';
 import thunk from 'redux-thunk';
-import { todosBranch } from './todos/index.js';
+import { todosBranch } from './todos';
 
-const composeEnhancers =
-  (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
-
-const rootReducer = combineReducers({
-  [todosBranch.name]: todosBranch.reducer
+export const store = createStore({
+  devTools: true,
+  middleware: [thunk],
+  reducers: {
+    [todosBranch.name]: todosBranch.reducer
+  }
 });
-
-const enhancer = composeEnhancers(applyMiddleware(thunk));
-
-export const createStore = () => {
-  return reduxCreateStore(rootReducer, enhancer);
-};

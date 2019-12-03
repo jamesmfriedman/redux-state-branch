@@ -1,3 +1,16 @@
+import {
+  combineReducers,
+  compose,
+  createStore as reduxCreateStore,
+  Reducer,
+  Middleware,
+  StoreEnhancer,
+  applyMiddleware
+} from 'redux';
+
+/*******************************************************
+ * Definitions
+ *******************************************************/
 interface AnyAction<T = any> {
   type: T;
   // Allows any extra properties to be defined in an action.
@@ -17,15 +30,6 @@ export interface StateBranchAction<ItemT, BranchStateT> extends AnyAction {
   meta: BranchStateT;
 }
 
-export interface Constants {
-  CREATE: string;
-  REPLACE: string;
-  UPDATE: string;
-  REMOVE: string;
-  RESET: string;
-  SET_META: string;
-}
-
 export interface State<Item> {
   items: { [key: string]: Item };
   [key: string]: any;
@@ -33,14 +37,23 @@ export interface State<Item> {
 
 type PartialWithId<T> = Partial<T> & { id: string };
 
-/**
+/*******************************************************
  * Constants
- */
+ *******************************************************/
 const RESET_ALL = 'RESET_ALL_BRANCHES';
 
-/**
+const createConstants = (name: string) => ({
+  CREATE: `${name}/CREATE`,
+  REPLACE: `${name}/REPLACE`,
+  UPDATE: `${name}/UPDATE`,
+  REMOVE: `${name}/REMOVE`,
+  SET_META: `${name}/SET_META`,
+  RESET: `${name}/RESET`
+});
+
+/*******************************************************
  * Utils
- */
+ *******************************************************/
 const makeType = (prefix: string, suffix?: string) =>
   `${prefix}${suffix ? '/' + suffix : ''}`;
 
@@ -58,34 +71,26 @@ const defaultGenerateId = (): string => {
   );
 };
 
-const constants = (name: string): Constants => ({
-  CREATE: `${name}/CREATE`,
-  REPLACE: `${name}/REPLACE`,
-  UPDATE: `${name}/UPDATE`,
-  REMOVE: `${name}/REMOVE`,
-  SET_META: `${name}/SET_META`,
-  RESET: `${name}/RESET`
-});
-
-/**
+/*******************************************************
  * Selectors
- */
+ *******************************************************/
 
-export const selectors = <
+export interface CreateSelectorOpts {
+  /** The name of your branch */
+  name: string;
+}
+
+/** A factory method for creating selector primitives. */
+export const createSelectors = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT> = State<ItemT>
 >({
   name
-}: {
-  /** The name of your branch */
-  name: string;
-}) => {
-  const all = <StateT>({
-    state
-  }: {
-    /** A global state object */
-    state: StateT;
-  }): ItemT[] => {
+}: CreateSelectorOpts) => {
+  const all = <StateT extends any>(
+    /** Your store's state object. */
+    state: StateT
+  ): ItemT[] => {
     return Object.values(state[name].items);
   };
 
@@ -93,34 +98,34 @@ export const selectors = <
     /** Get all items */
     all,
     /** Get an item by id */
-    byId: <StateT>({
-      state,
-      id
-    }: {
-      /** A global state object */
-      state: StateT;
-      /** The ID of your item */
-      id?: string | null;
-    }): ItemT | undefined => {
+    byId: <StateT extends any>(
+      /** Your store's state object. */
+      state: StateT,
+      {
+        id
+      }: {
+        /** The ID of your item */
+        id?: string | null;
+      }
+    ): ItemT | undefined => {
       return state[name].items[id || ''];
     },
     /** Gets an object map of unique ids to items {itemId: ItemT} */
-    mapById: <StateT>({
-      state
-    }: {
-      /** A global state object */
-      state: StateT;
-    }) => state[name].items as { [key: string]: ItemT },
+    mapById: <StateT extends any>(
+      /** Your store's state object. */
+      state: StateT
+    ) => state[name].items as { [key: string]: ItemT },
     /** Gets an object map of values of an item to an item {itemValueForKey: ItemT[]} */
-    mapByKey: <StateT>({
-      state,
-      key
-    }: {
-      /** A global state object */
-      state: StateT;
-      /** The key would would like to map the object by */
-      key: string;
-    }) => {
+    mapByKey: <StateT extends any>(
+      /** Your store's state object. */
+      state: StateT,
+      {
+        key
+      }: {
+        /** The key would would like to map the object by */
+        key: string;
+      }
+    ) => {
       const items = state[name].items as { [key: string]: ItemT };
 
       return Object.values(items).reduce<{ [key: string]: ItemT[] }>(
@@ -133,69 +138,70 @@ export const selectors = <
       );
     },
     /** Get items that meet a filter condition */
-    where: <StateT>({
-      state,
-      callback
-    }: {
-      /** A global state object */
-      state: StateT;
-      /** A callback to pass the filter function */
-      callback: (item: ItemT, index: number) => boolean;
-    }): ItemT[] => {
-      return all({ state }).filter(callback);
+    where: <StateT extends any>(
+      /** Your store's state object. */
+      state: StateT,
+      {
+        callback
+      }: {
+        /** A callback to pass the filter function */
+        callback: (item: ItemT, index: number) => boolean;
+      }
+    ): ItemT[] => {
+      return all(state).filter(callback);
     },
     /** Get the top level meta content  */
-    meta: <StateT>({
-      state
-    }: {
-      /** A global state object */
-      state: StateT;
-    }): BranchStateT => {
+    meta: <StateT extends any>(
+      /** Your store's state object. */
+      state: StateT
+    ): BranchStateT => {
       return state[name];
     }
   };
 };
 
-/**
+/*******************************************************
  * Action Creators
- */
+ *******************************************************/
 
 /** An action creator to reset all branches */
 export const resetAllBranches = (): AnyAction => ({
   type: RESET_ALL
 });
 
-export const actions = <
+/** A factory method for creating action primitives. */
+export interface CreateActionsOpts<ItemT> {
+  /** The name of your branch  */
+  name: string;
+  /** A default item used when creating new items  */
+  defaultItem?: Partial<ItemT>;
+  /** A default item used when creating new items  */
+  generateId?: () => string;
+}
+
+/** A factory method for creating action primitives. */
+export const createActions = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT> = State<ItemT>
 >({
   name,
   defaultItem = {},
   generateId = defaultGenerateId
-}: {
-  /* The name of your branch  */
-  name: string;
-  /* A default item used when creating new items  */
-  defaultItem?: Partial<ItemT>;
-  /* A default item used when creating new items  */
-  generateId?: () => string;
-}) => {
-  const constant = constants(name);
+}: CreateActionsOpts<ItemT>) => {
+  const constant = createConstants(name);
   return {
     /** Create an item */
     create: (items?: ItemsT<ItemT>, typeSuffix?: string) => {
       const ensureItem = (items || {}) as ItemT;
-      const newCreateItems = ensureArray<ItemT>(ensureItem).map(
-        (item: ItemT) => {
-          if (item.id === undefined) {
-            item.id = generateId();
-          }
-          return {
-            ...defaultItem,
-            ...item
-          };
+      const newCreateItems = ensureArray<ItemT>(ensureItem).map(item => {
+        if (item.id === undefined) {
+          item.id = generateId();
         }
-      );
+        return {
+          ...defaultItem,
+          ...item
+        };
+      });
 
       return {
         type: makeType(constant.CREATE, typeSuffix),
@@ -243,10 +249,49 @@ export const actions = <
   };
 };
 
+/*******************************************************
+ * State Branch
+ *******************************************************/
+
+export interface StateBranchOpts<
+  ActionsT,
+  SelectorsT,
+  ConstantsT,
+  UtilsT,
+  ItemT,
+  BranchStateT
+> {
+  /** The name of your branch. */
+  name: string;
+  /** Additional actions to use with your branch. */
+  actions?: ActionsT;
+  /** Additional selectors to use with your branch. */
+  selectors?: SelectorsT;
+  /** Additional constants to use with your branch. */
+  constants?: ConstantsT;
+  /** Additional utilities to use with your branch. */
+  utils?: UtilsT;
+  /** A defaultItem to be merged into newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the defaultItem to the `createActions` factory. */
+  defaultItem?: Partial<ItemT>;
+  /** An initial state for the reducer. */
+  defaultState?: BranchStateT;
+  /** Custom reducer handling to be used in addition to Redux StateBranch's built in handling. */
+  reducer?: Reducer<BranchStateT>;
+  /** A custom id generating function for newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the generateId function to the `createActions` factory. */
+  generateId?: () => string;
+}
+
+/** A factory for creating branches of your state. */
 export const stateBranch = <
   ItemT extends AnyItem,
   BranchStateT extends State<ItemT>
->() => <ActionsT, SelectorsT, ConstantsT, UtilsT>({
+>() => <
+  ActionsT,
+  SelectorsT,
+  ConstantsT,
+  UtilsT,
+  RestT extends { [key: string]: any }
+>({
   name,
   defaultItem = {},
   generateId: customGenerateIdFunc = defaultGenerateId,
@@ -255,35 +300,33 @@ export const stateBranch = <
   constants: customConstants = {} as ConstantsT,
   utils = {} as UtilsT,
   defaultState = { items: {} } as BranchStateT,
-  reducer: extendedReducer = (state, action) => state
-}: {
-  name: string;
-  actions?: ActionsT;
-  selectors?: SelectorsT;
-  constants?: ConstantsT;
-  utils?: UtilsT;
-  defaultItem?: Partial<ItemT>;
-  defaultState?: BranchStateT;
-  reducer?: (state: BranchStateT, action: any) => BranchStateT;
-  generateId?: () => string;
-}) => {
+  reducer: extendedReducer = (state, action) => state as BranchStateT,
+  ...rest
+}: StateBranchOpts<
+  ActionsT,
+  SelectorsT,
+  ConstantsT,
+  UtilsT,
+  ItemT,
+  BranchStateT
+> &
+  RestT) => {
   const constant = {
     ...customConstants,
-    ...constants(name)
+    ...createConstants(name)
   };
 
-  const defaultActions = actions<ItemT, BranchStateT>({
+  const defaultActions = createActions<ItemT, BranchStateT>({
     name,
     defaultItem,
     generateId: customGenerateIdFunc
   });
 
-  const defaultSelectors = selectors<ItemT, BranchStateT>({ name });
+  const defaultSelectors = createSelectors<ItemT, BranchStateT>({
+    name
+  });
 
-  const reducer = (
-    _state: any = defaultState,
-    _action: AnyAction
-  ): BranchStateT => {
+  const reducer = (_state: any = defaultState, _action: any): BranchStateT => {
     const state = _state as BranchStateT;
     const action = _action as StateBranchAction<ItemT, BranchStateT>;
     const items = ensureArray<ItemT>(action.items);
@@ -291,13 +334,16 @@ export const stateBranch = <
 
     switch (type) {
       case constant.CREATE:
-        const newCreateItems = items.reduce((acc, item: ItemT) => {
-          acc[item.id] = {
-            ...(state.items[item.id] || {}),
-            ...item
-          };
-          return acc;
-        }, {});
+        const newCreateItems = items.reduce<{ [id: string]: ItemT }>(
+          (acc, item) => {
+            acc[item.id] = {
+              ...(state.items[item.id] || {}),
+              ...item
+            };
+            return acc;
+          },
+          {}
+        );
 
         return {
           ...state,
@@ -307,13 +353,16 @@ export const stateBranch = <
           }
         };
       case constant.UPDATE:
-        const newUpdateItems = items.reduce((acc, item: ItemT) => {
-          acc[item.id] = {
-            ...(state.items[item.id] || {}),
-            ...item
-          };
-          return acc;
-        }, {});
+        const newUpdateItems = items.reduce<{ [id: string]: ItemT }>(
+          (acc, item) => {
+            acc[item.id] = {
+              ...(state.items[item.id] || {}),
+              ...item
+            };
+            return acc;
+          },
+          {}
+        );
 
         return {
           ...state,
@@ -323,10 +372,13 @@ export const stateBranch = <
           }
         };
       case constant.REPLACE:
-        const newReplaceItems = items.reduce((acc, item: ItemT) => {
-          acc[item.id] = item;
-          return acc;
-        }, {});
+        const newReplaceItems = items.reduce<{ [id: string]: ItemT }>(
+          (acc, item) => {
+            acc[item.id] = item as ItemT;
+            return acc;
+          },
+          {}
+        );
 
         return {
           ...state,
@@ -337,7 +389,7 @@ export const stateBranch = <
         };
       case constant.REMOVE:
         const newRemoveItems = items.reduce(
-          (acc, item: ItemT) => {
+          (acc, item) => {
             delete acc[item.id];
             return acc;
           },
@@ -362,6 +414,7 @@ export const stateBranch = <
   };
 
   return {
+    ...rest,
     name,
     constant,
     util: utils,
@@ -377,4 +430,41 @@ export const stateBranch = <
       ...customSelectors
     }
   };
+};
+
+/*******************************************************
+ * Create Store
+ *******************************************************/
+
+export interface CreateStoreOpts {
+  /** An array of enhancers to pass to the store. */
+  enhancers?: StoreEnhancer[];
+  /** An array of middleware to pass to the store. */
+  middleware?: Middleware[];
+  /** An object map of reducers */
+  reducers?: { [reducerName: string]: Reducer };
+  /** Whether or not to enable devTools */
+  devTools?: boolean;
+}
+
+/** A factory for creating a Redux store. */
+export const createStore = ({
+  reducers = {},
+  middleware = [],
+  enhancers = [],
+  devTools = false
+}: CreateStoreOpts) => {
+  // Easiest way to get devtools working in your browser if you have the extension installed
+  const composeEnhancers =
+    (devTools && (window as any).__REDUX_DEVTOOLS_EXTENSION_COMPOSE__) ||
+    compose;
+
+  const rootReducer = combineReducers(reducers);
+
+  const enhancer = composeEnhancers(
+    applyMiddleware(...middleware),
+    ...enhancers
+  );
+
+  return reduxCreateStore(rootReducer, enhancer);
 };
