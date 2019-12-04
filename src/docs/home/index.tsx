@@ -11,7 +11,9 @@ export const Home = () => (
     <Tree className="home__tree" />
     <div>
       <h1 className="home__title">Redux StateBranch</h1>
-      <h2 className="home__subtitle">A redux wrapper for sane people.</h2>
+      <h2 className="home__subtitle">
+        A library for simplified Redux development .
+      </h2>
 
       <code className="home__npm-install">
         npm&nbsp;install
