@@ -88,6 +88,10 @@ describe('Constants', () => {
     expect(branch.constant.SET_META).toBe(`${name}/SET_META`);
   });
 
+  it('NOOP', () => {
+    expect(branch.constant.NOOP).toBe(`${name}/NOOP`);
+  });
+
   it('custom', () => {
     expect(branch.constant.CUSTOM).toBe(`CUSTOM_CONSTANT`);
   });
@@ -152,6 +156,12 @@ describe('Actions', () => {
     const action = branch.action.setMeta({ metaItem: 'changed' });
     const state = branch.reducer(undefined, action);
     expect(state.metaItem).toBe('changed');
+  });
+
+  it('setMeta', () => {
+    const action = branch.action.noop();
+    const state = branch.reducer(undefined, action);
+    expect(state).toBe(state);
   });
 
   it('reset', () => {

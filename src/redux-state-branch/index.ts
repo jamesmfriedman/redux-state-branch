@@ -38,20 +38,6 @@ export interface State<Item> {
 type PartialWithId<T> = Partial<T> & { id: string };
 
 /*******************************************************
- * Constants
- *******************************************************/
-const RESET_ALL = 'RESET_ALL_BRANCHES';
-
-const createConstants = (name: string) => ({
-  CREATE: `${name}/CREATE`,
-  REPLACE: `${name}/REPLACE`,
-  UPDATE: `${name}/UPDATE`,
-  REMOVE: `${name}/REMOVE`,
-  SET_META: `${name}/SET_META`,
-  RESET: `${name}/RESET`
-});
-
-/*******************************************************
  * Utils
  *******************************************************/
 const makeType = (prefix: string, suffix?: string) =>
@@ -72,10 +58,28 @@ const defaultGenerateId = (): string => {
 };
 
 /*******************************************************
+ * Constants
+ *******************************************************/
+const RESET_ALL = 'RESET_ALL_BRANCHES';
+
+export const createConstant = (name: string, constant: string) =>
+  `${name}/${constant}`;
+
+export const createConstants = (name: string) => ({
+  CREATE: createConstant(name, 'CREATE'),
+  REPLACE: createConstant(name, 'REPLACE'),
+  UPDATE: createConstant(name, 'UPDATE'),
+  REMOVE: createConstant(name, 'REMOVE'),
+  SET_META: createConstant(name, 'SET_META'),
+  RESET: createConstant(name, 'RESET'),
+  NOOP: createConstant(name, 'NOOP')
+});
+
+/*******************************************************
  * Selectors
  *******************************************************/
 
-export interface CreateSelectorOpts {
+export interface CreateSelectorsOpts {
   /** The name of your branch */
   name: string;
 }
@@ -86,7 +90,7 @@ export const createSelectors = <
   BranchStateT extends State<ItemT> = State<ItemT>
 >({
   name
-}: CreateSelectorOpts) => {
+}: CreateSelectorsOpts) => {
   const all = <StateT extends any>(
     /** Your store's state object. */
     state: StateT
@@ -245,6 +249,10 @@ export const createActions = <
     /** Reset branch to initial state */
     reset: (typeSuffix?: string) => ({
       type: makeType(constant.RESET, typeSuffix)
+    }),
+    /** Do nothing */
+    noop: (typeSuffix?: string) => ({
+      type: makeType(constant.NOOP, typeSuffix)
     })
   };
 };
