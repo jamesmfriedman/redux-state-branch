@@ -36,6 +36,9 @@ function TodosExample() {
   // Resets the entire todos reducer to its initial state
   const reset = () => dispatch(todosBranch.action.reset());
 
+  // Does absolutely nothing... Useful for side effects in epics / sagas that end up not impacting the store
+  const noop = () => dispatch(todosBranch.action.noop());
+
   // Special action creator, will reset ALL state branches to their initial state
   const resetAll = () => dispatch(resetAllBranches())
 }
