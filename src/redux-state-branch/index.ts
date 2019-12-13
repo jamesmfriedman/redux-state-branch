@@ -91,9 +91,9 @@ export const createSelectors = <
 >({
   name
 }: CreateSelectorsOpts) => {
-  const all = <StateT extends any>(
+  const all = (
     /** Your store's state object. */
-    state: StateT
+    state: any
   ): ItemT[] => {
     return Object.values(state[name].items);
   };
@@ -102,9 +102,9 @@ export const createSelectors = <
     /** Get all items */
     all,
     /** Get an item by id */
-    byId: <StateT extends any>(
+    byId: (
       /** Your store's state object. */
-      state: StateT,
+      state: any,
       {
         id
       }: {
@@ -115,14 +115,14 @@ export const createSelectors = <
       return state[name].items[id || ''];
     },
     /** Gets an object map of unique ids to items {itemId: ItemT} */
-    mapById: <StateT extends any>(
+    mapById: (
       /** Your store's state object. */
-      state: StateT
+      state: any
     ) => state[name].items as { [key: string]: ItemT },
     /** Gets an object map of values of an item to an item {itemValueForKey: ItemT[]} */
-    mapByKey: <StateT extends any>(
+    mapByKey: (
       /** Your store's state object. */
-      state: StateT,
+      state: any,
       {
         key
       }: {
@@ -142,9 +142,9 @@ export const createSelectors = <
       );
     },
     /** Get items that meet a filter condition */
-    where: <StateT extends any>(
+    where: (
       /** Your store's state object. */
-      state: StateT,
+      state: any,
       {
         callback
       }: {
@@ -155,9 +155,9 @@ export const createSelectors = <
       return all(state).filter(callback);
     },
     /** Get the top level meta content  */
-    meta: <StateT extends any>(
+    meta: (
       /** Your store's state object. */
-      state: StateT
+      state: any
     ): BranchStateT => {
       return state[name];
     }
