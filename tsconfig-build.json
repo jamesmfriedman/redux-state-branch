@@ -22,5 +22,5 @@
       "redux-state-branch/*": ["src/redux-state-branch/*"]
     }
   },
-  "include": ["src/**/*", "typings/**/*"]
+  "include": ["src/redux-state-branch/*", "typings/**/*"]
 }
