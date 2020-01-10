@@ -38,7 +38,7 @@
     "react-markdown-loader": "git+https://github.com/jamesmfriedman/react-markdown-loader.git",
     "react-redux": "^7.1.3",
     "react-router-dom": "^5.1.2",
-    "react-scripts": "^3.2.0",
+    "react-scripts": "^3.3.0",
     "rmwc": "^5.7.1",
     "typescript": "^3.7.2"
   },
