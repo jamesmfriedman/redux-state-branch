@@ -19,9 +19,10 @@
     "docgen": "documentalist ./src/redux-state-branch/index.ts --no-css --no-md > ./src/docs/api-reference/generated-props.json"
   },
   "devDependencies": {
-    "@types/jest": "^24.0.23",
-    "@types/node": "^12.12.14",
-    "@types/react": "^16.9.13",
+    "@babel/runtime": "^7.7.7",
+    "@types/jest": "^24.0.25",
+    "@types/node": "^12.12.24",
+    "@types/react": "^16.9.17",
     "@types/react-dom": "^16.9.4",
     "@types/react-redux": "^7.1.5",
     "@types/react-router-dom": "^5.1.3",
@@ -31,7 +32,7 @@
     "normalize.css": "^8.0.1",
     "prettier": "^1.19.1",
     "prettier-tslint": "^0.4.2",
-    "prismjs": "^1.17.1",
+    "prismjs": "^1.18.0",
     "react": "^16.12.0",
     "react-app-rewired": "^2.1.5",
     "react-dom": "^16.12.0",
@@ -39,8 +40,8 @@
     "react-redux": "^7.1.3",
     "react-router-dom": "^5.1.2",
     "react-scripts": "^3.3.0",
-    "rmwc": "^5.7.1",
-    "typescript": "^3.7.2"
+    "rmwc": "^5.7.2",
+    "typescript": "^3.7.4"
   },
   "browserslist": {
     "production": [
@@ -53,5 +54,6 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  }
+  },
+  "dependencies": {}
 }
