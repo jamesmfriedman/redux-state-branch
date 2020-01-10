@@ -14,12 +14,20 @@ function TodosExample() {
   const allTodos = useSelector(state => todosBranch.select.all(state));
     
   // byId: Select a specific todo
-  const allTodos = useSelector(state => todosBranch.select.byId(state, {id: 'myTodoId'}));
+  const specificTodo = useSelector(state => todosBranch.select.byId(state, {id: 'myTodoId'}));
+
+  // byId can also select multiple items by passing an array of Ids.
+  // returns
+  // {
+  //  '1': {id: '1', text: 'hello', priority: 'low'}
+  //  '2': {id: '2', text: 'another todo', priority: 'low'}
+  // }
+  const specificTodos = useSelector(state => todosBranch.select.byId(state, {id: ['1', '2']}));
 
   // where: Select todos that meet a condition as an array
   const doneTodos = useSelector(state => todosBranch.select.where(state, {callback: (todo) => !!todo.isDone})),
   
-  // mapById: Get a map of ids to items
+  // mapById: Get a map of all ids to all items
   // returns
   // {
   //  '1': {id: '1', text: 'hello', priority: 'low'}

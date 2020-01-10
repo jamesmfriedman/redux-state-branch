@@ -102,16 +102,30 @@ export const createSelectors = <
     /** Get all items */
     all,
     /** Get an item by id */
-    byId: (
+    byId: <T extends string | null | Array<string>>(
       /** Your store's state object. */
       state: any,
       {
         id
       }: {
         /** The ID of your item */
-        id?: string | null;
+        id?: T;
       }
-    ): ItemT | undefined => {
+    ): T extends Array<string>
+      ? { [itemId: string]: ItemT | undefined }
+      : ItemT | undefined => {
+      if (Array.isArray(id)) {
+        const objects = id.reduce<{ [itemId: string]: ItemT | undefined }>(
+          (acc, aId) => {
+            acc[aId] = state[name].items[aId || ''];
+            return acc;
+          },
+          {}
+        );
+        // @ts-ignore This is a valid return, but Typescript can't return Array.isArray ahead of time
+        return objects;
+      }
+
       return state[name].items[id || ''];
     },
     /** Gets an object map of unique ids to items {itemId: ItemT} */

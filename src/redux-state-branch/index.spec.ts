@@ -19,6 +19,10 @@ const DEFAULT_STATE = {
     testUser: {
       id: 'testUser',
       name: 'James Friedman'
+    },
+    testUser2: {
+      id: 'testUser2',
+      name: 'James Friedman 2'
     }
   }
 };
@@ -254,6 +258,15 @@ describe('Selectors', () => {
     );
   });
 
+  it('byId multiple', () => {
+    const res = branch.select.byId(state, { id: ['testUser', 'testUser2'] });
+
+    expect(res).toEqual({
+      [DEFAULT_STATE.items.testUser.id]: DEFAULT_STATE.items.testUser,
+      [DEFAULT_STATE.items.testUser2.id]: DEFAULT_STATE.items.testUser2
+    });
+  });
+
   it('byId undefined', () => {
     expect(branch.select.byId(state, { id: 'nonExistant' })).toBeUndefined();
   });
@@ -275,7 +288,8 @@ describe('Selectors', () => {
 
   it('mapByKey', () => {
     expect(branch.select.mapByKey(state, { key: 'name' })).toEqual({
-      ['James Friedman']: [DEFAULT_STATE.items.testUser]
+      ['James Friedman']: [DEFAULT_STATE.items.testUser],
+      ['James Friedman 2']: [DEFAULT_STATE.items.testUser2]
     });
   });
 
