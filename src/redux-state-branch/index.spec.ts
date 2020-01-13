@@ -253,13 +253,12 @@ describe('Selectors', () => {
   const state = { [branch.name]: branchState };
 
   it('byId', () => {
-    expect(branch.select.byId(state, { id: 'testUser' })).toBe(
-      DEFAULT_STATE.items.testUser
-    );
+    const res = branch.select.byId(state, { id: 'testUser' });
+    expect(res).toBe(DEFAULT_STATE.items.testUser);
   });
 
   it('byId multiple', () => {
-    const res = branch.select.byId(state, { id: ['testUser', 'testUser2'] });
+    const res = branch.select.byIds(state, { ids: ['testUser', 'testUser2'] });
 
     expect(res).toEqual({
       [DEFAULT_STATE.items.testUser.id]: DEFAULT_STATE.items.testUser,
