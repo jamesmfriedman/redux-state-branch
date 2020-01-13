@@ -257,7 +257,7 @@ describe('Selectors', () => {
     expect(res).toBe(DEFAULT_STATE.items.testUser);
   });
 
-  it('byId multiple', () => {
+  it('byIds multiple', () => {
     const res = branch.select.byIds(state, { ids: ['testUser', 'testUser2'] });
 
     expect(res).toEqual({
