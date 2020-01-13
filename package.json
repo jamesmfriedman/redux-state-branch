@@ -1,6 +1,6 @@
 {
   "name": "redux-state-branch",
-  "version": "1.2.0",
+  "version": "1.2.1",
   "private": false,
   "description": "A library for simplified Redux development.",
   "homepage": "https://jamesmfriedman.github.io/redux-state-branch/",
