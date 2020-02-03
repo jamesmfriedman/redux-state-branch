@@ -136,7 +136,7 @@ export const createSelectors = <
     mapById: (
       /** Your store's state object. */
       state: any
-    ) => state[name].items as { [key: string]: ItemT },
+    ) => state[name].items as { [key: string]: ItemT | undefined },
     /** Gets an object map of values of an item to an item {itemValueForKey: ItemT[]} */
     mapByKey: (
       /** Your store's state object. */
@@ -148,16 +148,19 @@ export const createSelectors = <
         key: string;
       }
     ) => {
-      const items = state[name].items as { [key: string]: ItemT };
+      const items = state[name].items as { [key: string]: ItemT | undefined };
 
-      return Object.values(items).reduce<{ [key: string]: ItemT[] }>(
-        (acc, item) => {
-          acc[item[key]] = acc[item[key]] || [];
-          acc[item[key]].push(item);
+      return Object.values(items).reduce<{
+        [key: string]: ItemT[] | undefined;
+      }>((acc, item) => {
+        if (!item) {
           return acc;
-        },
-        {}
-      );
+        }
+
+        const arr = (acc[item[key]] = acc[item[key]] || []);
+        arr.push(item);
+        return acc;
+      }, {});
     },
     /** Get items that meet a filter condition */
     where: (
