@@ -305,7 +305,7 @@ export interface StateBranchOpts<
   /** An initial state for the reducer. */
   defaultState?: BranchStateT;
   /** Custom reducer handling to be used in addition to Redux StateBranch's built in handling. */
-  reducer?: Reducer<BranchStateT>;
+  reducer?: Reducer<BranchStateT | undefined>;
   /** A custom id generating function for newly created objects. This only applies if you have NOT specified any custom actions. When specifying custom actions, pass the generateId function to the `createActions` factory. */
   generateId?: () => string;
 }
@@ -438,7 +438,7 @@ export const stateBranch = <
       case RESET_ALL:
         return defaultState;
       default:
-        return extendedReducer(state, action);
+        return extendedReducer(state, action) as BranchStateT;
     }
   };
 
